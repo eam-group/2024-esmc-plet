@@ -1,0 +1,12 @@
+name: py_env
+
+channels:
+  - conda-forge
+  - anaconda
+
+dependencies:
+  - python
+  - matplotlib
+  - pandas
+  - numpy
+  - seaborn
