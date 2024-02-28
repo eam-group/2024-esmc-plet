@@ -22,23 +22,22 @@ data_path = "C:/Users/sheila.saia/OneDrive - Tetra Tech, Inc/Documents/github/20
 # %% --- read in data ---
 
 # path to data
-cn_data_path = data_path + "cn_data.csv"
+cn_lookup_path = data_path + "hydrology/cn_lookup.csv"
 
 # read data
-# cn_data = pandas.read_csv("data/cn_data.csv") # use relative path
-cn_data = pandas.read_csv(cn_data_path)  # use full path
+cn_lookup = pandas.read_csv(cn_lookup_path)  # use full path
 
 # check data
-# cn_data.head()
-# cn_data.columns
+# cn_lookup.head()
+# cn_lookup.columns
 
 # %% --- define inputs ---
 
 # unique options
-# crop_vals = numpy.unique(cn_data['crop'])
-# practice_vals = numpy.unique(cn_data['practice'])
-# hydro_cond_vals = numpy.unique(cn_data['hydro_condition'].dropna())
-# hsg_vals = numpy.unique(cn_data['hsg'])
+# crop_vals = numpy.unique(cn_lookup['crop'])
+# practice_vals = numpy.unique(cn_lookup['practice'])
+# hydro_cond_vals = numpy.unique(cn_lookup['hydro_condition'].dropna())
+# hsg_vals = numpy.unique(cn_lookup['hsg'])
 
 # user defined inputs
 my_crop_type = "Row Crop"
@@ -47,11 +46,11 @@ my_hydro_cond = "Poor"
 my_hsg = "C"
 
 # find cn for user defined inputs
-sel_data = cn_data[
-    (cn_data["crop"] == my_crop_type)
-    & (cn_data["practice"] == my_practice)
-    & (cn_data["hydro_condition"] == my_hydro_cond)
-    & (cn_data["hsg"] == my_hsg)
+sel_data = cn_lookup[
+    (cn_lookup["crop"] == my_crop_type)
+    & (cn_lookup["practice"] == my_practice)
+    & (cn_lookup["hydro_condition"] == my_hydro_cond)
+    & (cn_lookup["hsg"] == my_hsg)
 ]
 
 # get cn value
@@ -60,26 +59,26 @@ cn_val = sel_data["cn"].iloc[0]
 # %% --- make a function to get cn ---
 
 
-def get_cn_val(cn_data, crop_type, practice, hsg, hydro_cond=None):
+def get_cn_val(cn_lookup, crop_type, practice, hsg, hydro_cond=None):
     # optional arg: hydro_cond
 
     # bare soil has no hydro_cond so separate this out
     if practice == "Bare soil":
-        # use values to filter cn_data
-        sel_data = cn_data[
-            (cn_data["crop"] == crop_type)
-            & (cn_data["practice"] == practice)
-            & (cn_data["hsg"] == hsg)
+        # use values to filter cn_lookup
+        sel_data = cn_lookup[
+            (cn_lookup["crop"] == crop_type)
+            & (cn_lookup["practice"] == practice)
+            & (cn_lookup["hsg"] == hsg)
         ]
 
     # if not bare soil
     else:
-        # use values to filter cn_data
-        sel_data = cn_data[
-            (cn_data["crop"] == crop_type)
-            & (cn_data["practice"] == practice)
-            & (cn_data["hydro_condition"] == hydro_cond)
-            & (cn_data["hsg"] == hsg)
+        # use values to filter cn_lookup
+        sel_data = cn_lookup[
+            (cn_lookup["crop"] == crop_type)
+            & (cn_lookup["practice"] == practice)
+            & (cn_lookup["hydro_condition"] == hydro_cond)
+            & (cn_lookup["hsg"] == hsg)
         ]
 
     # check size
@@ -100,7 +99,7 @@ def get_cn_val(cn_data, crop_type, practice, hsg, hydro_cond=None):
 # test the function
 # Small Grains,Contoured,Good,B,73
 cn_val_1 = get_cn_val(
-    cn_data=cn_data,
+    cn_lookup=cn_lookup,
     crop_type="Small Grains",
     practice="Contoured",
     hydro_cond="Good",
@@ -111,7 +110,7 @@ cn_val_1  # returns 73, checks out!
 # test one more time
 # Fallow,Bare soil,,D,94
 cn_val_2 = get_cn_val(
-    cn_data=cn_data, 
+    cn_lookup=cn_lookup, 
     crop_type="Fallow", 
     practice="Bare soil", 
     hsg="D"
