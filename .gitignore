@@ -1,2 +1,25 @@
+# history files
+.Rhistory
+.Rapp.history
+
+# session data files
+.RData
+.RDataTmp
+
+# user-specific files
+.Ruserdata
+
+# rstudio files
+.Rproj.user/
+
+# spyder files
+.spyderproject
+
+# knitr and R markdown default cache directories
+*_cache/
+
 # ignore data folder
-data/
+/data
+
+# ignore functions folder (for now)
+/functions
