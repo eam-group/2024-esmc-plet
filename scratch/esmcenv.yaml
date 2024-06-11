@@ -11,6 +11,9 @@ dependencies:
   - pandas
   - geopandas
   - rasterio
+  - xarray
+  - rioxarray
+  - xarray-spatial
   - requests
   - spyder
   - rust
@@ -19,9 +22,9 @@ dependencies:
   - planetary-computer
   - pynhd
   - pygeoutils
-  - xarray-spatial
  # - vscode-python
   - pip
   - pip: 
     - pyPRISMClimate
     - us
+    - git+https://github.com/ncss-tech/pysda.git@main
