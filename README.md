@@ -1,18 +1,49 @@
-# README
+# README for `2024-esmc-plet`
 
-Steps to setting up python environment in vscode
+## 1. Project Information
 
-1. create yml file with all the appropriate libraries you will use
-2. open anaconda launch anaconda powershell prompt
-3. cd to folder with yml file
-4. run `mamba env create -f pyenv.yml`
-5. wait a bit for anaconda to create the environment
-6. make a project folder in github directory
-7. open anaconda and select `py_env` from the list and wait for it to load
-8. go to home tab and launch vscode
-9. open project folder in vscode
-10. ctrl + shift + P to get to command palette and then "Python: Select Interpreter" to set the environment by selecting the environment you just created
-11. should work fine now! (can see in the terminal that the env is set)
-12. if you need to open powershell, be sure to launch it from the anaconda so the environment is set approporiately (note that you may have to install it if it's not available by default and then launch)
+**Client Name:** Ecosystem Services Market Consortium (ESMC)
 
-Note to self: need to create new text (.gitignore) file manually in file explorer b/c touch doesn't work in powershell.
+**Project Period:** May 2024 - May 2025
+
+**Project Number:** 100-WTR-T43877 (task 3)
+
+**EAM Staff Project Manager:** Brian Pickard (brian.pickard@tetratech.com)
+
+**EAM Project Staff:** Sheila Saia (sheila.saia@tetratech.com), Maddie Keefer (maddie.keefer@tetratech.com), Hannah Ferriby (hannah.ferriby@tetratech.com)
+
+**EAM Repo Maintainer/Key Contact:** Sheila Saia (sheila.saia@tetratech.com)
+
+**Project Description (1-3 sentences):** Tetra Tech is collaborating with ESMC's EcoHarvest MMRV technical and operational teams to develop an ESMC-specific version of the U.S. Environmental Protection Agency (USEPA) Pollutant Load Estimation Tool (PLET), henceforth referred to as the PLET module. The PLET module will be used to quantify impacts of water quality and water quantity best management practices. Specifically, ESMC will use the PLET module to automate the impact quantification scope 3 producer programs on cropped and grazed lands.
+
+**O-Drive Project URL:** Projects\ESMC\2024_contract\
+
+**Project Tags:** INSERT_TAGS (URL_WITH_EAM_TAGS_LIST)
+
+**Coding Programs Used:** Python
+
+
+## 2. Repository File Structure Description
+
+INSERT DETAILS ABOUT THE FILE STRUCTURE, INCLUDING A DESCRIPTION OF FILES, PRESCRIBED ORDER OF ANALYSIS, ETC.
+
+**[to be filled in]**
+
+## 3. Description of Data Sources and Versions
+
+INSERT DETAILS ABOUT THE SOURCES OF DATA USED, INCLUDING THEIR VERSIONS AND RELEVANT CITATIONS AND WEB URLS.
+
+**[to be filled in]**
+
+## 4. Description of Libraries/Packages Used and Versions
+
+INSERT DETAILS ABOUT THE CODING LIBRARIES/PACKAGES USED, INCLUDING THEIR VERSIONS AND RELEVANT CITATIONS AND WEB URLS.
+
+**[to be filled in]**
+
+## 5. Additional Information
+
+INSERT ANY ADDITIONAL INFORMATION. FEEL FREE TO RENAME THIS SECTION OR ADD MORE SECTIONS, AS NEEDED.
+
+**[to be filled in]**
+
