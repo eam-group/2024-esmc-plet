@@ -6,8 +6,8 @@
 
 # script name: 04_get_nlcd_data.py
 
-# script description: this script gets nlcd land cover data to run the plet
-# module calculations.
+# script description: this script gets nlcd land cover data to run the
+# plet module calculations
 
 # to do:
 

@@ -6,8 +6,8 @@
 
 # script name: 03_get_soils_data.py
 
-# script description: this script gets soils property (including usle information)
-# to run the plet module calculations.
+# script description: this script gets soils property (including usle 
+# information) to run the plet module calculations
 
 # to do:
 

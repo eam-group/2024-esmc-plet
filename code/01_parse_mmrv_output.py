@@ -6,8 +6,8 @@
 
 # script name: 01_parse_mmrv_output.py
 
-# script description: this script parses the ecoharvest mmrv output for later
-# plet module calculation
+# script description: this script parses the ecoharvest mmrv output for
+# later plet module calculation
 
 # to do:
 
