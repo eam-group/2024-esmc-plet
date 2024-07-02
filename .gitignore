@@ -24,6 +24,9 @@ cache/
 # spyder project files
 .spyproject/
 
+# vs code project files
+.vscode/
+
 # ignore data folder
 /data
 
