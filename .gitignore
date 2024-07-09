@@ -1,37 +1,18 @@
-# history files
-.Rhistory
-.Rapp.history
-
-# session data files
-.RData
-.RDataTmp
-
-# user-specific files
-.Ruserdata
-
-# rstudio files
-.Rproj.user/
-
 # spyder files
 .spyderproject
-
-# knitr and R markdown default cache directories
-*_cache/
-
-# python cache
-cache/
-
-# spyder project files
 .spyproject/
 
 # vs code project files
 .vscode/
 
+# r cache
+*_cache/
+
+# python cache
+/cache
+
 # ignore data folder
 /data
-
-# ignore functions folder (for now)
-/functions
 
 # ignore to_delete folder
 /to_delete
