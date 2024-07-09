@@ -27,23 +27,52 @@
 
 INSERT DETAILS ABOUT THE FILE STRUCTURE, INCLUDING A DESCRIPTION OF FILES, PRESCRIBED ORDER OF ANALYSIS, ETC.
 
-**[to be filled in]**
+[fill in]
 
 ## 3. Description of Data Sources and Versions
 
 INSERT DETAILS ABOUT THE SOURCES OF DATA USED, INCLUDING THEIR VERSIONS AND RELEVANT CITATIONS AND WEB URLS.
 
-**[to be filled in]**
+[fill in]
 
 ## 4. Description of Libraries/Packages Used and Versions
 
 INSERT DETAILS ABOUT THE CODING LIBRARIES/PACKAGES USED, INCLUDING THEIR VERSIONS AND RELEVANT CITATIONS AND WEB URLS.
 
-**[to be filled in]**
+[fill in]
 
 ## 5. Additional Information
 
 INSERT ANY ADDITIONAL INFORMATION. FEEL FREE TO RENAME THIS SECTION OR ADD MORE SECTIONS, AS NEEDED.
 
-**[to be filled in]**
+[fill in]
+
+
+# Table of Contents
+
+1. [Third-Party Services](#1-third-party-services)
+
+2. [Architecture Overview](#2-architecture-overview)
+
+3. [Documentation Overview](#3-documentation-overview)
+
+4. [Contact Information](#4-contact-information)
+
+## 1. Third-Party Services
+
+[fill in]
+
+## 2. Arcitecture Overview
+
+[fill in]
+
+## 3. Documentation Overview
+
+[fill in]
+
+## 4. Contact Information
+
+[fill in]
+
+
 
