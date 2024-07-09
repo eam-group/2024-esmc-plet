@@ -79,13 +79,14 @@ def calc_q(p, s):
 # hold off on this for now until verify with esmc that it's needed
 
 # baseline runoff volume
-def calc_base_runoff_v(q, area, rain_days, rd_cor):
+def calc_base_run_v(q, area, rain_days, rd_cor):
     '''
     description:
     calculate baseline condition runoff volume (acre-feet)
 
     parameters:
         q (float): runoff (inches/day), see calc_q function
+        (this depends on calc_p and calc_s functions as well)
         area (float): area of field (acres)
         rain_days (float): average number of rainy days per year
         rd_cor (float): rain day correction factor
@@ -194,7 +195,7 @@ def calc_base_run_sl(erosion, area):
         sheet and rill erosion (tons/year)
     '''
     # area cutoff
-    area_cutoff = 200 # acres?? - check units!
+    area_cutoff = 200 # TODO acres?? - check units!
 
     # sediment delivery ratio
     # if less than area_cutoff
@@ -211,6 +212,91 @@ def calc_base_run_sl(erosion, area):
     # return
     return b_run_sl
 
+# TODO need a baseline version of calc_prac_sed_nl()
 
+# practice change runoff volume
+def calc_prac_run_v(q, area, rain_days, rd_cor):
+    '''
+    description:
+    calculate practice change condition runoff volume (acre-feet)
+
+    parameters:
+        q (float): runoff (inches/day), see calc_q function
+        (this depends on calc_p and calc_s functions as well, where
+        cn is for the practice change)
+        area (float): area of field (acres)
+        rain_days (float): average number of rainy days per year
+        rd_cor (float): rain day correction factor
+
+    returns:
+        b_run_v (float): runoff volume (acre-feet)
+    '''
+    # calculate p
+    p_run_v = (q/12) * area * (rain_days * rd_cor)
+
+    # return
+    return p_run_v
+
+# practice change sediment-bound nutrient load (reduction)
+def calc_prac_sed_nl(b_run_nl, erosion, area, bmp_eff, soil_nl_perc):
+    '''
+    description:
+    calculate practice change condition sediment-bound nutrient load
+    (lbs), can be used to calculate nutrient load for either nitrogen or 
+    phosphorus and for either cropped land or grazed land/pastureland
+
+    parameters:
+        b_run_nl (float): baseline annual runoff load for *either* 
+        nitrogen or phosphorus (lbs)
+        erosion (float): sediment loss due to sheet and rill 
+        erosion (tons/year), see erosion function
+        area (float): area of field (acres)
+        bmp_eff (float): bmp efficiency
+        soil_nl_perc (float): soil nutrient decimal percent (%)
+
+    returns:
+        p_sed_nl (float): practice change sediment-bound nutrient
+        load (lbs)
+    '''
+    # area cutoff
+    area_cutoff = 200 # TODO acres?? - check units!
+
+    # sediment delivery ratio
+    # if less than area_cutoff
+    if area <= area_cutoff:
+        del_ratio = 0.42 * area**(-0.125)
+        
+    # else if greater than area_cutoff
+    else:
+        del_ratio = (0.417662 * area**(-0.134958)) - 0.127097
+
+    # TODO check if separate calc for pasture vs crop!
+
+    # convert erosion from tons to lbs
+    e_lbs = erosion * 2000
+
+    # calculate
+    p_sed_nl = e_lbs * del_ratio * (1 - bmp_eff) * soil_nl_perc
+
+# practice change nutrient load (reduction)
+def calc_prac_run_nl(b_run_nl, bmp_eff, sed_nl):
+    '''
+    description:
+    calculate practice change condition runoff nutrient load (lbs),
+    can be used to calculate nutrient load for either nitrogen or 
+    phosphorus and for either cropped land or grazed land/pastureland
+
+    parameters:
+        b_run_nl (float): baseline annual runoff load for *either* 
+        nitrogen or phosphorus (lbs)
+        bmp_eff (float): bmp efficiency
+        p_sed_nl (float): sediment-bound nutrient load, 
+        see calc_prac_sed_nl function
+
+    returns:
+        p_run_nl (float): practice change runoff nutrient load (lbs)
+    '''
+    # calculate
+    p_run_nl = b_run_nl * bmp_eff + p_sed_nl # TODO check this!
 
 
