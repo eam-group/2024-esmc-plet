@@ -83,6 +83,9 @@ def calc_q(p, s):
 
 # irrigation runoff (q_irr)
 # hold off on this for now until verify with esmc that it's needed
+# use equation 2 in the user guide but water depth per irrigation (in)
+# is used instead of rainfall (P) and annual runoff volume from
+# cropland is sum of surface runoff volume and irrigation volume
 
 
 # %% ---- baseline functions ----
@@ -145,7 +148,7 @@ def calc_base_gw_v(inf_frac, p, area, rain_days, rd_cor):
     return b_in_v
 
 # baseline runoff nutrient load (for n or p)
-def calc_base_run_nl(b_run_v, nm, conc, conc_m):
+def calc_base_run_nl(b_run_v, n_months, conc, conc_m):
     '''
     description:
     calculate baseline annual runoff nutrient load (lbs), can be used 
@@ -154,21 +157,22 @@ def calc_base_run_nl(b_run_v, nm, conc, conc_m):
 
     parameters:
         b_run_v (float): runoff volume (acre-feet)
-        nm (float): number of months manure is applied
+        n_months (float): number of months manure is applied
         conc (float): concentration of the nutrients (either nitrogen or
-        phosphorus) in runoff *not* during manure application
+        phosphorus) in runoff *not* during manure application (mg/L)
         conc_m (float): concentration of the nutrients (either nitrogen
-        or phosphorus) in runoff *during* manure application
+        or phosphorus) in runoff *during* manure application (mg/L)
 
     returns:
         b_run_nl (float): baseline annual runoff load for *either* 
         nitrogen or phosphorus (lbs)
     '''
-    # compute fraction
-    nm_frac = nm/12 # 12 months in a year
+    # compute manure fraction
+    # (number of months/year that manure is applied)
+    m_frac = n_months/12 # 12 months in a year
 
     # baseline runoff nutrient load
-    b_run_nl = b_run_v * ((1 - nm_frac) * conc + nm_frac * conc_m) * (4047 * 0.3048/1000 * 2.2)
+    b_run_nl = b_run_v * ((1 - m_frac) * conc + m_frac * conc_m) * (4047 * 0.3048/1000 * 2.2)
     # this can be calculated individually for nitrogen and phosphorus
 
     # return
@@ -259,7 +263,7 @@ def calc_prac_run_v(q, area, rain_days, rd_cor):
     return p_run_v
 
 # practice change sediment-bound nutrient load (reduction)
-def calc_prac_sed_nl(b_run_nl, erosion, area, bmp_eff, soil_nl_perc):
+def calc_prac_sed_nl(b_run_nl, erosion, area, bmp_eff, soil_conc):
     '''
     description:
     calculate practice change condition sediment-bound nutrient load
@@ -273,7 +277,8 @@ def calc_prac_sed_nl(b_run_nl, erosion, area, bmp_eff, soil_nl_perc):
         erosion (tons/year), see erosion function
         area (float): area of field (acres)
         bmp_eff (float): bmp efficiency
-        soil_nl_perc (float): soil nutrient decimal percent (%)
+        soil_conc (float): soil nutrient concentration for *either*
+        nitrogen or phosphorus (decimal percent)
 
     returns:
         p_sed_nl (float): practice change sediment-bound nutrient
@@ -297,7 +302,7 @@ def calc_prac_sed_nl(b_run_nl, erosion, area, bmp_eff, soil_nl_perc):
     e_lbs = erosion * 2000
 
     # calculate
-    p_sed_nl = e_lbs * del_ratio * (1 - bmp_eff) * soil_nl_perc
+    p_sed_nl = e_lbs * del_ratio * (1 - bmp_eff) * soil_conc
 
 # practice change nutrient load (reduction)
 def calc_prac_run_nl(b_run_nl, bmp_eff, p_sed_nl):
