@@ -9,10 +9,16 @@
 # script description: this script contains functions needed to run the 
 # plet module
 
+# notes:
+# all calculations are assumed to be at an annual timestep
+# sediment load is in units of tons
+# nutrient load (nitrogen and phosphorous) is in units of lbs
+# runoff volumnes (all water quantity stuff) are in units of acre-feet
+
 # to do:
 
-# %% --- plet module functions ----
 
+# %% ---- general functions ----
 # precipitation
 def calc_p(aa_rain, r_cor, rain_days, rd_cor):
     '''
@@ -78,6 +84,8 @@ def calc_q(p, s):
 # irrigation runoff (q_irr)
 # hold off on this for now until verify with esmc that it's needed
 
+
+# %% ---- baseline functions ----
 # baseline runoff volume
 def calc_base_run_v(q, area, rain_days, rd_cor):
     '''
@@ -94,8 +102,11 @@ def calc_base_run_v(q, area, rain_days, rd_cor):
     returns:
         b_run_v (float): runoff volume (acre-feet)
     '''
+    # convert inches to feet
+    q_ft = q/12
+
     # calculate p
-    b_run_v = (q/12) * area * (rain_days * rd_cor)
+    b_run_v = q_ft * area * (rain_days * rd_cor)
 
     # return
     return b_run_v
@@ -123,9 +134,12 @@ def calc_base_gw_v(inf_frac, p, area, rain_days, rd_cor):
     '''
     # infiltration depth
     infil = inf_frac * p
+
+    # convert inches to feet
+    infil_ft = infil/12
     
     # baseline groundwater infiltraiton volume
-    b_in_v = (infil/12) * area * (rain_days, rd_cor)
+    b_in_v = infil_ft * area * (rain_days, rd_cor)
 
     # return
     return b_in_v
@@ -150,14 +164,17 @@ def calc_base_run_nl(b_run_v, nm, conc, conc_m):
         b_run_nl (float): baseline annual runoff load for *either* 
         nitrogen or phosphorus (lbs)
     '''
+    # compute fraction
+    nm_frac = nm/12 # 12 months in a year
+
     # baseline runoff nutrient load
-    b_run_nl = b_run_v * ((1 - (nm/12)) * conc + (nm/12) * conc_m) * (4047 * 0.3048/1000 * 2.2)
+    b_run_nl = b_run_v * ((1 - nm_frac) * conc + nm_frac * conc_m) * (4047 * 0.3048/1000 * 2.2)
     # this can be calculated individually for nitrogen and phosphorus
 
     # return
     return b_run_nl
 
-# sediment loss
+# sediment loss due to erosion
 def calc_e(r_fact, k_fact, ls_fact, c_fact, p_fact, area):
     '''
     description:
@@ -182,12 +199,12 @@ def calc_e(r_fact, k_fact, ls_fact, c_fact, p_fact, area):
 def calc_base_run_sl(erosion, area):
     '''
     description:
-    calculate baseline sediment loss in runoff due to sheet and rill
+    calculate baseline sediment load in runoff due to sheet and rill
     erosion (tons/year)
 
     parameters:
-        erosion (float): sediment loss due to sheet and rill 
-        erosion (tons/year), see calc_e function
+        erosion (float): sediment loss due to erosion (tons/year), 
+        see calc_e function
         area (float): area of field (acres??)
 
     returns:
@@ -214,6 +231,7 @@ def calc_base_run_sl(erosion, area):
 
 # TODO need a baseline version of calc_prac_sed_nl()
 
+# %% ---- practice change functions ----
 # practice change runoff volume
 def calc_prac_run_v(q, area, rain_days, rd_cor):
     '''
@@ -231,8 +249,11 @@ def calc_prac_run_v(q, area, rain_days, rd_cor):
     returns:
         b_run_v (float): runoff volume (acre-feet)
     '''
+    # convert inches to feet
+    q_ft = q/12
+
     # calculate p
-    p_run_v = (q/12) * area * (rain_days * rd_cor)
+    p_run_v = q_ft * area * (rain_days * rd_cor)
 
     # return
     return p_run_v
@@ -272,14 +293,14 @@ def calc_prac_sed_nl(b_run_nl, erosion, area, bmp_eff, soil_nl_perc):
 
     # TODO check if separate calc for pasture vs crop!
 
-    # convert erosion from tons to lbs
+    # convert tons to lbs
     e_lbs = erosion * 2000
 
     # calculate
     p_sed_nl = e_lbs * del_ratio * (1 - bmp_eff) * soil_nl_perc
 
 # practice change nutrient load (reduction)
-def calc_prac_run_nl(b_run_nl, bmp_eff, sed_nl):
+def calc_prac_run_nl(b_run_nl, bmp_eff, p_sed_nl):
     '''
     description:
     calculate practice change condition runoff nutrient load (lbs),
