@@ -1,0 +1,22 @@
+land_use,hsg,cn_value,notes
+cropland,a,67,
+cropland,b,78,
+cropland,c,85,
+cropland,d,89,
+cropland,a_d,67,same as hsg a
+cropland,b_d,78,same as hsg b
+cropland,c_d,85,same as hsg c
+pastureland,a,49,
+pastureland,b,69,
+pastureland,c,79,
+pastureland,d,84,
+pastureland,a_d,49,same as hsg a
+pastureland,b_d,69,same as hsg b
+pastureland,c_d,79,same as hsg c
+forest,a,39,
+forest,b,60,
+forest,c,73,
+forest,d,79,
+forest,a_d,39,same as hsg a
+forest,b_d,60,same as hsg b
+forest,c_d,73,same as hsg c

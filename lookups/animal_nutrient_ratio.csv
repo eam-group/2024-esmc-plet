@@ -1,0 +1,12 @@
+﻿animal,animal_detail,nutrient_ratio_nitrogen,nutrient_ratio_phosphorus
+beef_cattle,slaughter_steer,1,1
+beef_cattle,young_beef,0.5,0.51
+dairy_cattle,,1.853,0.92
+hog,feeder_pig,0.076,0.07
+hog,swine,0.306,0.27
+sheep,,0.124,0.06
+horse,,0.882,0.42
+chicken,,0.01,0.01
+turkey,,0.018,0.03
+duck,,0.018,0.01
+goose,,,
