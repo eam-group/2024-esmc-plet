@@ -89,9 +89,9 @@ Instructions explaining how to perform a variety of tasks can be found in the fo
 
 - [ANALYSIS.md](ANALYSIS.md) explains the various PLET module analysis scripts and how to set up the analysis server.
 - [CITATION.md](CITATION.md) explains how to cite and give attribution to PLET and the PLET module source code.
-- [DEVELOPER.md](DEVELOPER.md) explains the structure of the repository, how to setup the API webs service and how to perform common development tasks.
-- [DATA_UPDATES.md](DATA_UPDATES.md) explains how to update PLET module datasets. This will be done once per year for more datasets and as updates are released by the corresponding dataset provider (approx every 5 years) for other datasets. 
 - [CONTRIBUTING.md](CONTRIBUTING.md) explains how to submit a PLET module issue.
+- [DATA_UPDATES.md](DATA_UPDATES.md) explains how to update PLET module datasets. This will be done once per year for more datasets and as updates are released by the corresponding dataset provider (approx every 5 years) for other datasets. 
+- [DEVELOPER.md](DEVELOPER.md) explains the structure of the repository, how to setup the API webs service and how to perform common development tasks.
 
 ## 4. Contact Information
 
