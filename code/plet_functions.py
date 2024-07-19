@@ -20,7 +20,7 @@
 
 # %% ---- general functions ----
 # precipitation
-def calc_p(aa_rain, r_cor, rain_days, rd_cor):
+def calc_p(gdf, aa_rain, r_cor, rain_days, rd_cor):
     '''
     description:
     calculate rainfall per event (p) in units of inches.
@@ -35,10 +35,10 @@ def calc_p(aa_rain, r_cor, rain_days, rd_cor):
         p(float): rainfall per event (inches)
     '''
     # calculate p
-    p = (aa_rain * r_cor)/(rain_days * rd_cor)
+    gdf['p'] = (gdf[aa_rain] * gdf[r_cor])/(gdf[rain_days] * gdf[rd_cor])
 
     # return
-    return p
+    return gdf
 
 # potential maximum water retention after runoff begins
 def calc_s(cn):
