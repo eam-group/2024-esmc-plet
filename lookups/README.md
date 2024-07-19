@@ -22,6 +22,8 @@ contact email saia.sheila@tetratech.com
 
 7. `gw_nutrients.csv` - This lookup table is from PLET online tool "Additional Reference Tables" > Table #7a.
 
-8. `runoff_nutrients.csv` - This lookup table is from PLET online tool "Additional Reference Tables" > Table #7.
+8. `lu.csv` - This lookup table was manually created to link the land use type specified by the user to the land use type specified by PLET.
 
-9. `usle.csv` - This lookup table is from STEPL tool > Support folder > "USLEbyLU.csv".
+9. `runoff_nutrients.csv` - This lookup table is from PLET online tool "Additional Reference Tables" > Table #7.
+
+10. `usle.csv` - This lookup table is from STEPL tool > Support folder > "USLEbyLU.csv".
