@@ -4,7 +4,7 @@
 # date created: 2024-07-05
 # email: sheila.saia@tetratech.com
 
-# script name: 00_functions.py
+# script name: plet_functions.py
 
 # script description: this script contains functions needed to run the 
 # plet module
@@ -20,22 +20,24 @@
 
 # %% ---- general functions ----
 # precipitation
-def calc_p(gdf, aa_rain, r_cor, rain_days, rd_cor):
+def calc_p(gdf):
     '''
     description:
     calculate rainfall per event (p) in units of inches.
 
     parameters:
-        aa_rain (float): average annual rainfall (inches)
-        r_cor (float): rainfall correction factor
-        rain_days (float): average number of rainy days per year
-        rd_cor (float): rain day correction factor
+        gdf (geopandas geodataframe): PLET module geopandas dataframe
+        that must have the following columns:
+            aa_rain (float): average annual rainfall (inches)
+            r_cor (float): rainfall correction factor
+            rain_days (float): average number of rainy days per year
+            rd_cor (float): rain day correction factor
 
     returns:
-        p(float): rainfall per event (inches)
+        p (float): rainfall per event (inches), as a new column in gpf
     '''
     # calculate p
-    gdf['p'] = (gdf[aa_rain] * gdf[r_cor])/(gdf[rain_days] * gdf[rd_cor])
+    gdf['p'] = (gdf['aa_rain'] * gdf['r_cor'])/(gdf['rain_days'] * gdf['rd_cor'])
 
     # return
     return gdf
