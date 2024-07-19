@@ -1,0 +1,22 @@
+﻿land_use,hsg,gw_infil_frac,notes
+cropland,a,0.45,
+cropland,b,0.3,
+cropland,c,0.15,
+cropland,d,0.075,
+cropland,a_d,0.45,same as hsg a
+cropland,b_d,0.3,same as hsg b
+cropland,c_d,0.15,same as hsg c
+pastureland,a,0.45,
+pastureland,b,0.3,
+pastureland,c,0.15,
+pastureland,d,0.075,
+pastureland,a_d,0.45,same as hsg a
+pastureland,b_d,0.3,same as hsg b
+pastureland,c_d,0.15,same as hsg c
+forest,a,0.45,
+forest,b,0.3,
+forest,c,0.15,
+forest,d,0.075,
+forest,a_d,0.45,same as hsg a
+forest,b_d,0.3,same as hsg b
+forest,c_d,0.15,same as hsg c
