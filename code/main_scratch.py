@@ -57,7 +57,9 @@ bmp_eff_lookup = pd.read_csv(str(lookup_data_path + "bmp_eff_vals.csv"))
 cn_val_lookup = pd.read_csv(str(lookup_data_path + "cn.csv"))
 gw_infil_lookup = pd.read_csv(str(lookup_data_path + "gw_infil_frac.csv"))
 gw_nutr_lookup = pd.read_csv(str(lookup_data_path + "gw_nutrients.csv"))
+lu_lookup = pd.read_csv(str(lookup_data_path + "lu.csv"))
 runoff_nutr_lookup = pd.read_csv(str(lookup_data_path + "runoff_nutrients.csv"))
+usle_lookup = pd.read_csv(str(lookup_data_path + "usle.csv"))
 
 
 # %% ---- scratch calcs -----
@@ -67,13 +69,38 @@ field_data = field_data_raw.set_crs(albers_epsg, allow_override = True)
 
 # check
 # field_data.crs
-# type(field_data['area_ac'][0]) # int
-# type(field_data['n_months'][0]) # int
-# type(field_data['m_area_ac'][0]) # float
-# type(field_data['n_animals'][0]) # int
-# type(field_data['bmp_name'][0]) # str
-# type(field_data['bmp_ac'][0]) # float
+# field_data.columns
 
-# calculate field area
-# field_data_albers['area_acres'] = field_data.area / 4046.86 # 1 ac = 4046.36 m
+# add irrigation columns (hold off!)
 
+# add soil nutrient columns
+# insert code to calculate and add columns:
+# soil_n_ppm, soil_p_ppm, soil_conc, animal_density
+
+# add tiger columns
+# insert code to calculate and add columns:
+# state, county, fips
+
+# add nhdplusv2 columns
+# insert code to calculate and add columns:
+# huc4_num, huc4_name
+
+# add field area
+# field_data_albers['area_ac'] = field_data.area / 4046.86 # 1 ac = 4046.36 m
+
+# add prism columns
+# insert code to calculate and add columns: 
+# aa_rain, r_cor, rd_cor, rain_days, fall_frost, frost_avg
+
+# add usle columns
+fips_list = field_data['fips'].unique().astype('float64')
+# lu_list = field_data['user_lu'].replace('cropland', 'cropland-cultivated').unique()
+usle_lookup_sel = usle_lookup[usle_lookup['fips'].isin(fips_list)].merge(lu_lookup, how = 'left', on = 'land_use').dropna(subset = 'user_lu').reset_index()
+usle_lookup_sel_small = usle_lookup_sel.drop(['index', 'name', 'state_name', 'land_use'], axis = 1)
+field_data = field_data.merge(usle_lookup_sel_small, how = 'left', on = ['fips', 'user_lu'])
+
+
+
+# add soil columns
+# insert code to calculate and add columns:
+# hsg
