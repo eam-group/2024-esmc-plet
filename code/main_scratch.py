@@ -21,10 +21,13 @@ import pandas as pd
 import numpy as np
 import os
 import sys
+import importlib
 
 # plet module functions
 import plet_functions as plet
 
+# reimport for testing plet functions
+# importlib.reload(plet)
 
 # %% ---- set paths ----
 # project folder path
@@ -62,7 +65,7 @@ runoff_nutr_lookup = pd.read_csv(str(lookup_data_path + "runoff_nutrients.csv"))
 usle_lookup = pd.read_csv(str(lookup_data_path + "usle.csv"))
 
 
-# %% ---- scratch calcs -----
+# %% ---- finalize gdf ----
 # set field data to correct crs
 albers_epsg = "EPSG:5070" # albers equal area conic with units of meters
 field_data = field_data_raw.set_crs(albers_epsg, allow_override = True)
@@ -110,26 +113,6 @@ field_data = (field_data
 # check
 # field_data.columns
 
-# add gw infiltration columns
-# get unique hsg values for fields
-hsg_list = field_data['hsg'].unique()
-
-# rename column so can merge later
-gw_infil_lookup['user_lu'] =  gw_infil_lookup['land_use']
-
-# get subset of gw infiltration data based in hsg
-gw_infil_lookup_sel = (gw_infil_lookup[gw_infil_lookup['hsg'].isin(hsg_list)]
-                       .reset_index()
-                       .drop(['index', 'land_use', 'notes'], axis = 1))
-
-# merge with field data
-field_data = (field_data
-              .merge(gw_infil_lookup_sel, how = 'left', on = ['hsg', 'user_lu']))
-
-# check
-# field_data.columns
-# field_data['gw_infil_frac']
-
 # add cn column
 # get unique hsg values for fields
 hsg_list = field_data['hsg'].unique()
@@ -152,7 +135,31 @@ field_data = (field_data
 
 # add manure columns
 # insert code to calculate and add columns:
-# conc, conc_m
+# conc, conc_m, 
+
+# add gw infiltration columns
+# get unique hsg values for fields
+hsg_list = field_data['hsg'].unique()
+
+# rename column so can merge later
+gw_infil_lookup['user_lu'] =  gw_infil_lookup['land_use']
+
+# get subset of gw infiltration data based in hsg
+gw_infil_lookup_sel = (gw_infil_lookup[gw_infil_lookup['hsg'].isin(hsg_list)]
+                       .reset_index()
+                       .drop(['index', 'land_use', 'notes'], axis = 1))
+
+# merge with field data
+field_data = (field_data
+              .merge(gw_infil_lookup_sel, how = 'left', on = ['hsg', 'user_lu']))
+
+# check
+# field_data.columns
+# field_data['gw_infil_frac']
+
+# add gw columns
+# insert code to calculate and add columns: 
+# conc_gw
 
 # add bmp efficiency value column
 # get unique hsg values for fields
@@ -172,4 +179,31 @@ field_data = (field_data
 
 # check
 # field_data.columns
+# field_data.shape (4 fields, 30 columns)
 # field_data['eff_val_nitrogen']
+
+# %% ---- run functions ----
+# calculate p
+p_gdf = plet.calc_p(field_data)
+
+# check
+# p_gdf['p']
+
+# calculate s
+s_gdf = plet.calc_s(p_gdf)
+
+# check
+# s_gdf['s']
+
+# calculate q
+q_gdf = plet.calc_q(s_gdf)
+
+# check
+# q_gdf['cn_value']
+# q_gdf['q']
+
+# calculate baseline gw infiltration volume
+bgwv_gdf = plet.calc_base_gw_v(field_data)
+
+# check
+# bgwv_gdf['b_in_v']
