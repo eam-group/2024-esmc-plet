@@ -1,4 +1,4 @@
-land_use,bmp_short_name,bmp_full_name,eff_val_nitrogen,eff_val_phosphorus,eff_val_sediment
+land_use,bmp_name,bmp_full_name,eff_val_nitrogen,eff_val_phosphorus,eff_val_sediment
 cropland,bioreactor,Bioreactor,0.45,,
 cropland,forest_buffer_100ft,Buffer - Forest (100ft wide),0.49,0.47,0.60
 cropland,grass_buffer_35ft,Buffer - Grass (35ft wide),0.34,0.44,0.53
