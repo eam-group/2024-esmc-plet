@@ -93,14 +93,83 @@ field_data = field_data_raw.set_crs(albers_epsg, allow_override = True)
 # aa_rain, r_cor, rd_cor, rain_days, fall_frost, frost_avg
 
 # add usle columns
+# get unique fips values for fields
 fips_list = field_data['fips'].unique().astype('float64')
-# lu_list = field_data['user_lu'].replace('cropland', 'cropland-cultivated').unique()
-usle_lookup_sel = usle_lookup[usle_lookup['fips'].isin(fips_list)].merge(lu_lookup, how = 'left', on = 'land_use').dropna(subset = 'user_lu').reset_index()
-usle_lookup_sel_small = usle_lookup_sel.drop(['index', 'name', 'state_name', 'land_use'], axis = 1)
-field_data = field_data.merge(usle_lookup_sel_small, how = 'left', on = ['fips', 'user_lu'])
 
+# get subset of usle data based in fips and land use
+usle_lookup_sel = (usle_lookup[usle_lookup['fips'].isin(fips_list)]
+                               .merge(lu_lookup, how = 'left', on = 'land_use')
+                               .dropna(subset = 'user_lu')
+                               .reset_index()
+                               .drop(['index', 'name', 'state_name', 'land_use'], axis = 1))
 
+# merge with field data
+field_data = (field_data
+              .merge(usle_lookup_sel, how = 'left', on = ['fips', 'user_lu']))
 
-# add soil columns
+# check
+# field_data.columns
+
+# add gw infiltration columns
+# get unique hsg values for fields
+hsg_list = field_data['hsg'].unique()
+
+# rename column so can merge later
+gw_infil_lookup['user_lu'] =  gw_infil_lookup['land_use']
+
+# get subset of gw infiltration data based in hsg
+gw_infil_lookup_sel = (gw_infil_lookup[gw_infil_lookup['hsg'].isin(hsg_list)]
+                       .reset_index()
+                       .drop(['index', 'land_use', 'notes'], axis = 1))
+
+# merge with field data
+field_data = (field_data
+              .merge(gw_infil_lookup_sel, how = 'left', on = ['hsg', 'user_lu']))
+
+# check
+# field_data.columns
+# field_data['gw_infil_frac']
+
+# add cn column
+# get unique hsg values for fields
+hsg_list = field_data['hsg'].unique()
+
+# rename column so can merge later
+cn_val_lookup['user_lu'] =  cn_val_lookup['land_use']
+
+# get subset of cn lookup data based in hsg
+cn_val_lookup_sel = (cn_val_lookup[cn_val_lookup['hsg'].isin(hsg_list)]
+                       .reset_index()
+                       .drop(['index', 'land_use', 'notes'], axis = 1))
+
+# merge with field data
+field_data = (field_data
+              .merge(cn_val_lookup_sel, how = 'left', on = ['hsg', 'user_lu']))
+
+# check
+# field_data.columns
+# field_data['cn_value']
+
+# add manure columns
 # insert code to calculate and add columns:
-# hsg
+# conc, conc_m
+
+# add bmp efficiency value column
+# get unique hsg values for fields
+bmp_list = field_data['bmp_name'].unique()
+
+# rename column so can merge later
+bmp_eff_lookup['user_lu'] =  bmp_eff_lookup['land_use']
+
+# get subset of bmp eff value lookup data based in bmp_name
+bmp_eff_lookup_sel = (bmp_eff_lookup[bmp_eff_lookup['bmp_name'].isin(bmp_list)]
+                       .reset_index()
+                       .drop(['index', 'bmp_full_name', 'land_use'], axis = 1))
+
+# merge with field data
+field_data = (field_data
+              .merge(bmp_eff_lookup_sel, how = 'left', on = ['bmp_name', 'user_lu']))
+
+# check
+# field_data.columns
+# field_data['eff_val_nitrogen']
