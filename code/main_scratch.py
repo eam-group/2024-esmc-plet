@@ -133,9 +133,33 @@ field_data = (field_data
 # field_data.columns
 # field_data['cn_value']
 
+# add animal stats columns
+field_data = plet.calc_animal_stats(field_data, animal_type='beef_cattle')
+
+# check
+# field_data.columns
+# field_data['animal_den']
+# field_data['animal_inten']
+
 # add manure columns
-# insert code to calculate and add columns:
-# conc, conc_m, 
+# get unique lu values for fields
+inten_list = field_data['animal_inten'].unique()
+
+# rename column so can merge later
+runoff_nutr_lookup['user_lu'] =  runoff_nutr_lookup['land_use']
+
+# get subset of gw infiltration data based in hsg
+runoff_nutr_lookup_sel = (runoff_nutr_lookup[runoff_nutr_lookup['animal_inten']
+                                             .isin(inten_list)]
+                          .reset_index()
+                          .drop(['index', 'land_use'], axis = 1))
+
+# merge with field data
+field_data = (field_data
+              .merge(runoff_nutr_lookup_sel, how = 'left', on = ['user_lu', 'animal_inten']))
+
+# check
+# field_data.columns
 
 # add gw infiltration columns
 # get unique hsg values for fields
@@ -202,8 +226,15 @@ q_gdf = plet.calc_q(s_gdf)
 # q_gdf['cn_value']
 # q_gdf['q']
 
+# calculate baseline runoff volume
+brunv_gdf = plet.calc_base_run_v(q_gdf)
+
+# check
+# brunv_gdf['b_run_v']
+
 # calculate baseline gw infiltration volume
-bgwv_gdf = plet.calc_base_gw_v(field_data)
+bgwv_gdf = plet.calc_base_gw_v(q_gdf)
 
 # check
 # bgwv_gdf['b_in_v']
+
