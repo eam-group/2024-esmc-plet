@@ -4,7 +4,7 @@
 # date created: 2024-07-05
 # email: sheila.saia@tetratech.com
 
-# script name: 00_functions.py
+# script name: plet_functions.py
 
 # script description: this script contains functions needed to run the 
 # plet module
@@ -20,66 +20,72 @@
 
 # %% ---- general functions ----
 # precipitation
-def calc_p(gdf, aa_rain, r_cor, rain_days, rd_cor):
+def calc_p(gdf):
     '''
     description:
     calculate rainfall per event (p) in units of inches.
 
     parameters:
-        aa_rain (float): average annual rainfall (inches)
-        r_cor (float): rainfall correction factor
-        rain_days (float): average number of rainy days per year
-        rd_cor (float): rain day correction factor
+        gdf (geopandas geodataframe): PLET module geopandas dataframe
+        that must have the following columns:
+            aa_rain (float): average annual rainfall (inches)
+            r_cor (float): rainfall correction factor
+            rain_days (float): average number of rainy days per year
+            rd_cor (float): rain day correction factor
 
     returns:
-        p(float): rainfall per event (inches)
+        p (float): rainfall per event (inches), as a new column in gdf
     '''
     # calculate p
-    gdf['p'] = (gdf[aa_rain] * gdf[r_cor])/(gdf[rain_days] * gdf[rd_cor])
+    gdf['p'] = (gdf['aa_rain'] * gdf['r_cor'])/(gdf['rain_days'] * gdf['rd_cor'])
 
     # return
     return gdf
 
 # potential maximum water retention after runoff begins
-def calc_s(cn):
+def calc_s(gdf):
     '''
     description:
     calculate the potential maximum water retention after runoff 
     begins (inches)
 
     parameters:
-        cn (int): curve number for specific land cover/land use and
-        it's associated condition (e.g., good or poor)
+        gdf (geopandas geodataframe): PLET module geopandas dataframe
+        that must have the following columns:
+            cn (int): curve number for specific land cover/land use and
+            it's associated condition (e.g., good or poor)
 
     returns:
         s (float): potential maximum water retention after runoff 
-        begins (inches)
+        begins (inches), as a new column in gpf
     '''
     # calculate p
-    s = (1000/cn) - 10
+    gdf['s'] = (1000 / gdf['cn_value']) - 10
 
     # return
-    return s
+    return gdf
 
 # runoff
-def calc_q(p, s):
+def calc_q(gdf):
     '''
     description:
     calculate runoff (inches/day)
 
     parameters:
-        p (float): rainfall per event (inches), see calc_p function
-        s (float): potential maximum water retention after runoff 
-        begins (inches), see calc_s function
+        gdf (geopandas geodataframe): PLET module geopandas dataframe
+        that must have the following columns:
+            p (float): rainfall per event (inches), see calc_p function
+            s (float): potential maximum water retention after runoff 
+            begins (inches), see calc_s function
 
     returns:
-        q (float): runoff (inches/day)
+        q (float): runoff (inches/day), as a new column in gdf
     '''
     # calculate p
-    q = (p**2)/(p + s)
+    gdf['q'] = (gdf['p']**2)/(gdf['p'] + gdf['s'])
 
     # return
-    return q
+    return gdf
 
 # irrigation runoff (q_irr)
 # hold off on this for now until verify with esmc that it's needed
@@ -90,62 +96,67 @@ def calc_q(p, s):
 
 # %% ---- baseline functions ----
 # baseline runoff volume
-def calc_base_run_v(q, area, rain_days, rd_cor):
+def calc_base_run_v(gdf):
     '''
     description:
     calculate baseline condition runoff volume (acre-feet)
 
     parameters:
-        q (float): runoff (inches/day), see calc_q function
+        gdf (geopandas geodataframe): PLET module geopandas dataframe
+        that must have the following columns:
+            q (float): runoff (inches/day), see calc_q function
         (this depends on calc_p and calc_s functions as well)
-        area (float): area of field (acres)
-        rain_days (float): average number of rainy days per year
-        rd_cor (float): rain day correction factor
+            area_ac (float): area of field (acres)
+            rain_days (float): average number of rainy days per year
+            rd_cor (float): rain day correction factor
 
     returns:
-        b_run_v (float): runoff volume (acre-feet)
+        b_run_v (float): runoff volume (acre-feet), 
+        as a new column in gdf
     '''
     # convert inches to feet
-    q_ft = q/12
+    q_ft = gdf['q']/12
 
     # calculate p
-    b_run_v = q_ft * area * (rain_days * rd_cor)
+    gdf['b_run_v'] = q_ft * gdf['area_ac'] * (gdf['rain_days'] * gdf['rd_cor'])
 
     # return
-    return b_run_v
+    return gdf
 
 # baseline irrigation runoff volume (b_irr_v)
 # hold off on this for now until verify with esmc that it's needed
 
 # baseline groundwater infiltration volume
-def calc_base_gw_v(inf_frac, p, area, rain_days, rd_cor):
+def calc_base_gw_v(gdf):
     '''
     description:
     calculate baseline shallow groundwater infilatration
     volume (acre-feet)
 
     parameters:
-        inf_frac (float): infiltration fraction
-        p (float): rainfall per event (inches), see calc_p function
-        area (float): area of field (acres)
-        rain_days (float): average number of rainy days per year
-        rd_cor (float): rain day correction factor
+        gdf (geopandas geodataframe): PLET module geopandas dataframe
+        that must have the following columns:
+            gw_infil_frac (float): infiltration fraction
+            p (float): rainfall per event (inches), see calc_p function
+            area_ac (float): area of field (acres)
+            rain_days (float): average number of rainy days per year
+            rd_cor (float): rain day correction factor
 
     returns:
         b_in_v (float): baseline shallow groundwater infilatration
-        runoff volume (acre-feet)
+        runoff volume (acre-feet), as a new column in gdf
     '''
     # infiltration depth
-    infil = inf_frac * p
+    infil = gdf['gw_infil_frac'] * gdf['p']
 
     # convert inches to feet
     infil_ft = infil/12
     
     # baseline groundwater infiltraiton volume
-    b_in_v = infil_ft * area * (rain_days, rd_cor)
+    gdf['b_in_v'] = infil_ft * gdf['area_ac'] * (gdf['rain_days'] * gdf['rd_cor'])
 
     # return
-    return b_in_v
+    return gdf
 
 # baseline runoff nutrient load (for n or p)
 def calc_base_run_nl(b_run_v, n_months, conc, conc_m):

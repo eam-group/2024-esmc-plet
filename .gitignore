@@ -10,6 +10,8 @@
 
 # python cache
 /cache
+/code/__pycache__
+__pycache__
 
 # ignore data folders (for now)
 # /data
