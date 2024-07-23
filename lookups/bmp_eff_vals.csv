@@ -1,0 +1,33 @@
+land_use,bmp_name,bmp_full_name,eff_val_nitrogen,eff_val_phosphorus,eff_val_sediment
+cropland,bioreactor,Bioreactor,0.45,,
+cropland,forest_buffer_100ft,Buffer - Forest (100ft wide),0.49,0.47,0.60
+cropland,grass_buffer_35ft,Buffer - Grass (35ft wide),0.34,0.44,0.53
+cropland,cons_till_1,Conservation Tillage 1 (30-59% Residue),0.07,0.36,0.46
+cropland,cons_till_2,Conservation Tillage 2 (equal or more than 60% Residue),0.13,0.69,0.79
+cropland,cont_farm,Contour Farming,0.34,0.46,0.41
+cropland,control_drain,Controlled Drainage,0.39,0.35,
+cropland,cov_crop_1,Cover Crop 1 (Group A Commodity) (High Till only for Sediment),0.01,,
+cropland,cov_crop_2,Cover Crop 2 (Group A Traditional Normal Planting Time) (High Till only for TP and Sediment),0.20,0.07,0.10
+cropland,cov_crop_3,Cover Crop 3 (Group A Traditional Early Planting Time) (High Till only for TP and Sediment),0.20,0.15,0.20
+cropland,land_retire,Land Retirement,0.90,0.81,0.95
+cropland,nutrient_mgmt_1,Nutrient Management 1 (Determined Rate),0.15,0.45,
+cropland,nutrient_mgmt_2,Nutrient Management 2 (Determined Rate Plus Additional Considerations),0.22,0.56,
+cropland,streambank_stabil,Streambank Stabilization and Fencing,0.75,0.75,0.75
+cropland,terrace,Terrace,0.27,0.31,0.41
+cropland,ditch,Two-Stage Ditch,0.12,0.28,
+pastureland,buffer_opt_graze,30m Buffer with Optimal Grazing,0.16,0.65,
+pastureland,alt_water,Alternative Water Supply,0.18,0.13,0.20
+pastureland,crit_area_plant,Critical Area Planting,0.18,0.20,0.42
+pastureland,forest_buffer_35ft,Forest Buffer (minimum 35 feet wide),0.45,0.40,0.53
+pastureland,grass_buffer_35ft,Grass Buffer (minimum 35 feet wide),0.87,0.89,0.65
+pastureland,graze_mgmt,Grazing Land Management (rotational grazing with fenced areas),0.43,0.26,
+pastureland,heavy_use_prot,Heavy Use Area Protection,0.18,0.19,0.33
+pastureland,litter_store_mgmt,Litter Storage and Management,0.14,0.14,0.00
+pastureland,exclu_fence,Livestock Exclusion Fencing,0.20,0.43,0.64
+pastureland,multiple,Multiple Practices,0.25,0.20,0.22
+pastureland,forage_plant,Pasture and Hayland Planting (also called Forage Planting),0.18,0.15,
+pastureland,prescr_graze,Prescribed Grazing,0.41,0.23,0.33
+pastureland,streambank_protect,Streambank Protection w/o Fencing,0.15,0.22,0.58
+pastureland,streambank_stabil,Streambank Stabilization and Fencing,0.75,0.75,0.75
+pastureland,exclusion,Use Exclusion,0.43,0.08,0.51
+pastureland,winter_feed,Winter Feeding Facility,0.35,0.40,0.40
