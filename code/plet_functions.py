@@ -93,8 +93,80 @@ def calc_q(gdf):
 # is used instead of rainfall (P) and annual runoff volume from
 # cropland is sum of surface runoff volume and irrigation volume
 
+# animal density and intensity
+def calc_animal_stats(gdf, animal_type = 'beef_cattle'):
+    '''
+    description:
+    calculate animal density (lbs/ac of live animal weight) and
+    animal intensity (low, medium, high)
 
-# %% ---- baseline functions ----
+    notes:
+    the usepa plet documentation defines low intensity as having an
+    animal density of 1500 lbs/ac of live animal weight or less, medium
+    intensity is defined as between 1500 and 2500 lbs/ac of live animal
+    weight, and high intensity is over 2500 lbs/ac of live animal weight
+
+    parameters:
+        gdf (geopandas geodataframe): PLET module geopandas dataframe
+        that must have the following columns:
+            n_animals (float): number of animals
+            area_ac (float): area of field (acres)
+            animal_type (str): type of anaimal
+
+    returns:
+        animal_den (float): animal density (lbs/ac of live animal
+        weight), as a new column in gdf
+        animal_inten (str): animal intensity (low, medium, high), a new
+        column in the gdf
+    '''
+    # if animal type is beef cattle
+    if(animal_type == 'beef_cattle'):
+        # define standard beef cattle weight (lbs)
+        animal_wt = 1000
+
+        # calculate animal density
+        gdf['animal_den'] = (gdf['n_animals'] * animal_wt) / gdf['area_ac']
+
+        # calculate animal intensity
+        gdf = gdf.reset_index()
+        for index, row in gdf.iterrows():
+            if (row['animal_den'] <= 1500):
+                gdf.loc[index, 'animal_inten'] = 'low'
+            
+            elif ((row['animal_den'] > 1500) | (row['animal_den'] < 2500)):
+                gdf.loc[index, 'animal_inten'] = 'medium'
+
+            elif (row['animal_den'] >= 2500):
+                gdf.loc[index, 'animal_inten'] = 'high'
+
+            else:
+                gdf.loc[index, 'animal_inten'] = None
+                print("intensity is outside of defined range")
+
+    # if not beef cattle
+    else:
+        gdf = gdf.reset_index()
+        for index, row in gdf.iterrows():
+            if ((row['animal_den'] >= 0) | (row['animal_den'] <= 1500)):
+                gdf.loc[index, 'animal_inten'] = None
+            
+            elif ((row['animal_den'] > 1500) | (row['animal_den'] < 2500)):
+                gdf.loc[index, 'animal_inten'] = None
+
+            elif (row['animal_den'] >= 2500):
+                gdf.loc[index, 'animal_inten'] = None
+
+            else:
+                gdf.loc[index, 'animal_inten'] = None
+                print("intensity is outside of defined range")
+
+        print("only beef cattle is allowed at this time")
+
+    # return
+    return gdf
+
+
+## %% ---- baseline functions ----
 # baseline runoff volume
 def calc_base_run_v(gdf):
     '''
@@ -105,7 +177,7 @@ def calc_base_run_v(gdf):
         gdf (geopandas geodataframe): PLET module geopandas dataframe
         that must have the following columns:
             q (float): runoff (inches/day), see calc_q function
-        (this depends on calc_p and calc_s functions as well)
+            (this depends on calc_p and calc_s functions as well)
             area_ac (float): area of field (acres)
             rain_days (float): average number of rainy days per year
             rd_cor (float): rain day correction factor
@@ -159,7 +231,7 @@ def calc_base_gw_v(gdf):
     return gdf
 
 # baseline runoff nutrient load (for n or p)
-def calc_base_run_nl(b_run_v, n_months, conc, conc_m):
+def calc_base_run_nl(gdf):
     '''
     description:
     calculate baseline annual runoff nutrient load (lbs), can be used 
@@ -167,27 +239,36 @@ def calc_base_run_nl(b_run_v, n_months, conc, conc_m):
     either cropped land or grazed land/pastureland
 
     parameters:
-        b_run_v (float): runoff volume (acre-feet)
-        n_months (float): number of months manure is applied
-        conc (float): concentration of the nutrients (either nitrogen or
-        phosphorus) in runoff *not* during manure application (mg/L)
-        conc_m (float): concentration of the nutrients (either nitrogen
-        or phosphorus) in runoff *during* manure application (mg/L)
+        gdf (geopandas geodataframe): PLET module geopandas dataframe
+        that must have the following columns:
+            b_run_v (float): runoff volume (acre-feet)
+            n_months (float): number of months manure is applied
+            conc_n (float): concentration of the nitrogen in runoff 
+            *not* during manure application (mg/L)
+            conc_p (float): concentration of phosphorus in runoff 
+            *not* during manure application (mg/L)
+            conc_mn (float): concentration of the nutrients (either nitrogen
+            or phosphorus) in runoff *during* manure application (mg/L)
+            conc_pm (float): 
 
     returns:
-        b_run_nl (float): baseline annual runoff load for *either* 
-        nitrogen or phosphorus (lbs)
+        b_run_n (float): baseline annual runoff load for
+        nitrogen (lbs), as a new column in gdf
+        b_run_p (float): baseline annual runoff load for
+        phosphorus (lbs), as a new column in gdf
     '''
     # compute manure fraction
     # (number of months/year that manure is applied)
-    m_frac = n_months/12 # 12 months in a year
+    m_frac = gdf['n_months']/12 # 12 months in a year
 
-    # baseline runoff nutrient load
-    b_run_nl = b_run_v * ((1 - m_frac) * conc + m_frac * conc_m) * (4047 * 0.3048/1000 * 2.2)
-    # this can be calculated individually for nitrogen and phosphorus
+    # baseline runoff nitrogen load
+    gdf['b_run_n'] = gdf['b_run_v'] * ((1 - m_frac) * gdf['conc_n'] + m_frac * gdf['conc_mn']) * (4047 * 0.3048/1000 * 2.2)
+    
+    # baseline runoff phosphorus load
+    gdf['b_run_p'] = gdf['b_run_v'] * ((1 - m_frac) * gdf['conc_p'] + m_frac * gdf['conc_mp']) * (4047 * 0.3048/1000 * 2.2)
 
     # return
-    return b_run_nl
+    return gdf
 
 # sediment loss due to erosion
 def calc_e(r_fact, k_fact, ls_fact, c_fact, p_fact, area):
