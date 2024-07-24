@@ -31,7 +31,9 @@ import plet_functions as plet
 
 # %% ---- set paths ----
 # project folder path
-proj_path = r"C:/Users/sheila.saia/OneDrive - Tetra Tech, Inc/Documents/github/2024-esmc-plet"
+proj_path = (
+    r"C:/Users/sheila.saia/OneDrive - Tetra Tech, Inc/Documents/github/2024-esmc-plet"
+)
 
 # data path
 data_path = proj_path + "/data/"
@@ -67,8 +69,8 @@ usle_lookup = pd.read_csv(str(lookup_data_path + "usle.csv"))
 
 # %% ---- finalize gdf ----
 # set field data to correct crs
-albers_epsg = "EPSG:5070" # albers equal area conic with units of meters
-field_data = field_data_raw.set_crs(albers_epsg, allow_override = True)
+albers_epsg = "EPSG:5070"  # albers equal area conic with units of meters
+field_data = field_data_raw.set_crs(albers_epsg, allow_override=True)
 
 # check
 # field_data.crs
@@ -92,123 +94,133 @@ field_data = field_data_raw.set_crs(albers_epsg, allow_override = True)
 # field_data_albers['area_ac'] = field_data.area / 4046.86 # 1 ac = 4046.36 m
 
 # add prism columns
-# insert code to calculate and add columns: 
+# insert code to calculate and add columns:
 # aa_rain, r_cor, rd_cor, rain_days, fall_frost, frost_avg
 
 # add usle columns
 # get unique fips values for fields
-fips_list = field_data['fips'].unique().astype('float64')
+fips_list = field_data["fips"].unique().astype("float64")
 
 # get subset of usle data based in fips and land use
-usle_lookup_sel = (usle_lookup[usle_lookup['fips'].isin(fips_list)]
-                               .merge(lu_lookup, how = 'left', on = 'land_use')
-                               .dropna(subset = 'user_lu')
-                               .reset_index()
-                               .drop(['index', 'name', 'state_name', 'land_use'], axis = 1))
+usle_lookup_sel = (
+    usle_lookup[usle_lookup["fips"].isin(fips_list)]
+    .merge(lu_lookup, how="left", on="land_use")
+    .dropna(subset="user_lu")
+    .reset_index()
+    .drop(["index", "name", "state_name", "land_use"], axis=1)
+)
 
 # merge with field data
-field_data = (field_data
-              .merge(usle_lookup_sel, how = 'left', on = ['fips', 'user_lu']))
+field_data_usle = field_data.merge(usle_lookup_sel, how="left", on=["fips", "user_lu"])
 
 # check
-# field_data.columns
+# field_data_usle.columns
 
 # add cn column
 # get unique hsg values for fields
-hsg_list = field_data['hsg'].unique()
+hsg_list = field_data_usle["hsg"].unique()
 
 # rename column so can merge later
-cn_val_lookup['user_lu'] =  cn_val_lookup['land_use']
+cn_val_lookup["user_lu"] = cn_val_lookup["land_use"]
 
 # get subset of cn lookup data based in hsg
-cn_val_lookup_sel = (cn_val_lookup[cn_val_lookup['hsg'].isin(hsg_list)]
-                       .reset_index()
-                       .drop(['index', 'land_use', 'notes'], axis = 1))
+cn_val_lookup_sel = (
+    cn_val_lookup[cn_val_lookup["hsg"].isin(hsg_list)]
+    .reset_index()
+    .drop(["index", "land_use", "notes"], axis=1)
+)
 
 # merge with field data
-field_data = (field_data
-              .merge(cn_val_lookup_sel, how = 'left', on = ['hsg', 'user_lu']))
+field_data_cn = field_data_usle.merge(
+    cn_val_lookup_sel, how="left", on=["hsg", "user_lu"]
+)
 
 # check
-# field_data.columns
-# field_data['cn_value']
+# field_data_cn.columns
+# field_data_cn['cn_value']
 
 # add animal stats columns
-field_data = plet.calc_animal_stats(field_data, animal_type='beef_cattle')
+field_data_ani = plet.calc_animal_stats(field_data_cn, animal_type="beef_cattle")
 
 # check
-# field_data.columns
-# field_data['animal_den']
-# field_data['animal_inten']
+# field_data_ani.columns
+# field_data_ani['animal_den']
+# field_data_ani['animal_inten']
 
 # add manure columns
 # get unique lu values for fields
-inten_list = field_data['animal_inten'].unique()
+inten_list = field_data_ani["animal_inten"].unique()
 
 # rename column so can merge later
-runoff_nutr_lookup['user_lu'] =  runoff_nutr_lookup['land_use']
+runoff_nutr_lookup["user_lu"] = runoff_nutr_lookup["land_use"]
 
 # get subset of gw infiltration data based in hsg
-runoff_nutr_lookup_sel = (runoff_nutr_lookup[runoff_nutr_lookup['animal_inten']
-                                             .isin(inten_list)]
-                          .reset_index()
-                          .drop(['index', 'land_use'], axis = 1))
+runoff_nutr_lookup_sel = (
+    runoff_nutr_lookup[runoff_nutr_lookup["animal_inten"].isin(inten_list)]
+    .reset_index()
+    .drop(["index", "land_use"], axis=1)
+)
 
 # merge with field data
-field_data = (field_data
-              .merge(runoff_nutr_lookup_sel, how = 'left', on = ['user_lu', 'animal_inten']))
+field_data_man = field_data_ani.merge(
+    runoff_nutr_lookup_sel, how="left", on=["user_lu", "animal_inten"]
+)
 
 # check
-# field_data.columns
+# field_data_man.columns
 
 # add gw infiltration columns
-# get unique hsg values for fields
-hsg_list = field_data['hsg'].unique()
-
 # rename column so can merge later
-gw_infil_lookup['user_lu'] =  gw_infil_lookup['land_use']
+gw_infil_lookup["user_lu"] = gw_infil_lookup["land_use"]
 
 # get subset of gw infiltration data based in hsg
-gw_infil_lookup_sel = (gw_infil_lookup[gw_infil_lookup['hsg'].isin(hsg_list)]
-                       .reset_index()
-                       .drop(['index', 'land_use', 'notes'], axis = 1))
+gw_infil_lookup_sel = (
+    gw_infil_lookup[gw_infil_lookup["hsg"].isin(hsg_list)]
+    .reset_index()
+    .drop(["index", "land_use", "notes"], axis=1)
+)
 
 # merge with field data
-field_data = (field_data
-              .merge(gw_infil_lookup_sel, how = 'left', on = ['hsg', 'user_lu']))
+field_data_inf = field_data_man.merge(
+    gw_infil_lookup_sel, how="left", on=["hsg", "user_lu"]
+)
 
 # check
-# field_data.columns
-# field_data['gw_infil_frac']
+# field_data_inf.columns
+# field_data_inf['gw_infil_frac']
 
 # add gw columns
-# insert code to calculate and add columns: 
+# insert code to calculate and add columns:
 # conc_gw
+field_data_gw = field_data_inf  # for now
 
 # add bmp efficiency value column
 # get unique hsg values for fields
-bmp_list = field_data['bmp_name'].unique()
+bmp_list = field_data_gw["bmp_name"].unique()
 
 # rename column so can merge later
-bmp_eff_lookup['user_lu'] =  bmp_eff_lookup['land_use']
+bmp_eff_lookup["user_lu"] = bmp_eff_lookup["land_use"]
 
 # get subset of bmp eff value lookup data based in bmp_name
-bmp_eff_lookup_sel = (bmp_eff_lookup[bmp_eff_lookup['bmp_name'].isin(bmp_list)]
-                       .reset_index()
-                       .drop(['index', 'bmp_full_name', 'land_use'], axis = 1))
+bmp_eff_lookup_sel = (
+    bmp_eff_lookup[bmp_eff_lookup["bmp_name"].isin(bmp_list)]
+    .reset_index()
+    .drop(["index", "bmp_full_name", "land_use"], axis=1)
+)
 
 # merge with field data
-field_data = (field_data
-              .merge(bmp_eff_lookup_sel, how = 'left', on = ['bmp_name', 'user_lu']))
+field_data_bmp = field_data_gw.merge(
+    bmp_eff_lookup_sel, how="left", on=["bmp_name", "user_lu"]
+)
 
 # check
-# field_data.columns
-# field_data.shape (4 fields, 30 columns)
-# field_data['eff_val_nitrogen']
+# field_data_bmp.columns
+# field_data_bmp.shape (4 fields, 30 columns)
+# field_data_bmp['eff_val_nitrogen']
 
 # %% ---- run functions ----
 # calculate p
-p_gdf = plet.calc_p(field_data)
+p_gdf = plet.calc_p(field_data_bmp)
 
 # check
 # p_gdf['p']
@@ -233,8 +245,40 @@ brunv_gdf = plet.calc_base_run_v(q_gdf)
 # brunv_gdf['b_run_v']
 
 # calculate baseline gw infiltration volume
-bgwv_gdf = plet.calc_base_gw_v(q_gdf)
+bgwv_gdf = plet.calc_base_gw_v(brunv_gdf)
 
 # check
 # bgwv_gdf['b_in_v']
 
+# calculate baseline runoff nutrient load (for n and p)
+brunl_gdf = plet.calc_base_run_nl(bgwv_gdf)
+
+# check
+# brunl_gdf.columns
+# brun1_gdf['b_run_n']
+# brun1_gdf['b_run_p']
+
+# calculate sediment loss from uniform erosion
+e_gdf = plet.calc_e(brunl_gdf)
+
+# check
+# e_gdf['erosion']
+
+# calculate baseline runoff sediment load
+bruns_gdf = plet.calc_base_run_sl(e_gdf)
+
+# check
+# bruns_gdf.columns
+# bruns_gdf['del_ratio']
+# bruns_gdf['b_run_sl']
+
+# calculate practice change runoff volume
+
+
+# calculate practice change runoff nutrient load (for n and p)
+
+
+# calculate practice change runoff sediment load
+
+
+#
