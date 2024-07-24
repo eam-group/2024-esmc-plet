@@ -230,7 +230,7 @@ def calc_base_gw_v(gdf):
     # return
     return gdf
 
-# baseline runoff nutrient load (for n or p)
+# baseline runoff nutrient load (for n and p)
 def calc_base_run_nl(gdf):
     '''
     description:
@@ -271,61 +271,72 @@ def calc_base_run_nl(gdf):
     return gdf
 
 # sediment loss due to erosion
-def calc_e(r_fact, k_fact, ls_fact, c_fact, p_fact, area):
+def calc_e(gdf):
     '''
     description:
     calculate sediment loss due to sheet and rill erosion (tons/year)
 
     parameters:
-        r_fact (float): RUSLE rainfall factor
-        k_fact (float): RUSLE soil erodibility factor
-        ls_fact (float): RUSLE topographic factor
-        c_fact (float): RUSLE cropping management factor
-        p_fact (float): RUSLE erosion control practice factor
-        area (float): area of field (acres??)
+        gdf (geopandas geodataframe): PLET module geopandas dataframe
+        that must have the following columns:
+            r_avg (float): RUSLE average rainfall factor
+            k_avg (float): RUSLE average soil erodibility factor
+            ls_avg (float): RUSLE average topographic factor
+            c_avg (float): RUSLE average cropping management factor
+            p_avg (float): RUSLE average erosion control practice factor
+            area_ac (float): area of field (acres??)
 
     returns:
         erosion (float): sediment loss due to sheet and rill 
-        erosion (tons/year)
+        erosion (tons/year), as a new column in gdf
     '''
     # sediment erosion
-    erosion = r_fact * k_fact * ls_fact * c_fact * p_fact * area
+    gdf['erosion'] = gdf['r_avg'] * gdf['k_avg'] * gdf['ls_avg'] * gdf['c_avg'] * gdf['p_avg'] * gdf['area_ac']
+
+    # return
+    return gdf
 
 # baseline runoff sediment load
-def calc_base_run_sl(erosion, area):
+def calc_base_run_sl(gdf):
     '''
     description:
     calculate baseline sediment load in runoff due to sheet and rill
     erosion (tons/year)
 
     parameters:
-        erosion (float): sediment loss due to erosion (tons/year), 
-        see calc_e function
-        area (float): area of field (acres??)
+        gdf (geopandas geodataframe): PLET module geopandas dataframe
+        that must have the following columns:
+            erosion (float): sediment loss due to erosion (tons/year), 
+            see calc_e function
+            area_ac (float): area of field (acres??)
 
     returns:
+        del_ratio (float): sediment delivery ratio (unitless), as a new
+        column in gdf
         b_run_sl (float): baseline sediment loss in runoff due to
-        sheet and rill erosion (tons/year)
+        sheet and rill erosion (tons/year), as a new column in gdf
     '''
     # area cutoff
     area_cutoff = 200 # TODO acres?? - check units!
 
     # sediment delivery ratio
-    # if less than area_cutoff
-    if area <= area_cutoff:
-        del_ratio = 0.42 * area**(-0.125)
-        
-    # else if greater than area_cutoff
-    else:
-        del_ratio = (0.417662 * area**(-0.134958)) - 0.127097
+    gdf = gdf.reset_index()
+    for index, row in gdf.iterrows():
+        # if less than area_cutoff
+        if row['area_ac'] <= area_cutoff:
+            gdf.loc[index, 'del_ratio'] = 0.42 * row['area_ac']**(-0.125)
+            
+        # else if greater than area_cutoff
+        else:
+            gdf.loc[index, 'del_ratio'] = (0.417662 * row['area_ac']**(-0.134958)) - 0.127097
 
     # sediment erosion
-    b_run_sl = erosion * del_ratio
+    gdf['b_run_sl'] = gdf['erosion'] * gdf['del_ratio']
 
     # return
-    return b_run_sl
+    return gdf
 
-# TODO need a baseline version of calc_prac_sed_nl()
+# TODO need a baseline version of calc_prac_sed_nl()?
 
 # %% ---- practice change functions ----
 # practice change runoff volume
@@ -354,7 +365,7 @@ def calc_prac_run_v(q, area, rain_days, rd_cor):
     # return
     return p_run_v
 
-# practice change sediment-bound nutrient load (reduction)
+# practice change runoff sediment-bound nutrient load (reduction)
 def calc_prac_sed_nl(b_run_nl, erosion, area, bmp_eff, soil_conc):
     '''
     description:
@@ -396,7 +407,7 @@ def calc_prac_sed_nl(b_run_nl, erosion, area, bmp_eff, soil_conc):
     # calculate
     p_sed_nl = e_lbs * del_ratio * (1 - bmp_eff) * soil_conc
 
-# practice change nutrient load (reduction)
+# practice change runoff nutrient load
 def calc_prac_run_nl(b_run_nl, bmp_eff, p_sed_nl):
     '''
     description:
