@@ -17,6 +17,9 @@
 
 # to do:
 
+# % ---- load libraries ----
+import numpy as np
+
 
 # %% ---- general functions ----
 # precipitation
@@ -128,7 +131,7 @@ def calc_animal_stats(gdf, animal_type = 'beef_cattle'):
         gdf['animal_den'] = (gdf['n_animals'] * animal_wt) / gdf['area_ac']
 
         # calculate animal intensity
-        gdf = gdf.reset_index()
+        gdf = gdf.reset_index(drop = True)
         for index, row in gdf.iterrows():
             if (row['animal_den'] <= 1500):
                 gdf.loc[index, 'animal_inten'] = 'low'
@@ -140,24 +143,24 @@ def calc_animal_stats(gdf, animal_type = 'beef_cattle'):
                 gdf.loc[index, 'animal_inten'] = 'high'
 
             else:
-                gdf.loc[index, 'animal_inten'] = None
+                gdf.loc[index, 'animal_inten'] = np.nan
                 print("intensity is outside of defined range")
 
     # if not beef cattle
     else:
-        gdf = gdf.reset_index()
+        gdf = gdf.reset_index(drop = True)
         for index, row in gdf.iterrows():
             if ((row['animal_den'] >= 0) | (row['animal_den'] <= 1500)):
-                gdf.loc[index, 'animal_inten'] = None
+                gdf.loc[index, 'animal_inten'] = np.nan
             
             elif ((row['animal_den'] > 1500) | (row['animal_den'] < 2500)):
-                gdf.loc[index, 'animal_inten'] = None
+                gdf.loc[index, 'animal_inten'] = np.nan
 
             elif (row['animal_den'] >= 2500):
-                gdf.loc[index, 'animal_inten'] = None
+                gdf.loc[index, 'animal_inten'] = np.nan
 
             else:
-                gdf.loc[index, 'animal_inten'] = None
+                gdf.loc[index, 'animal_inten'] = np.nan
                 print("intensity is outside of defined range")
 
         print("only beef cattle is allowed at this time")
@@ -320,7 +323,7 @@ def calc_base_run_sl(gdf):
     area_cutoff = 200 # TODO acres?? - check units!
 
     # sediment delivery ratio
-    gdf = gdf.reset_index()
+    gdf = gdf.reset_index(drop = True)
     for index, row in gdf.iterrows():
         # if less than area_cutoff
         if row['area_ac'] <= area_cutoff:
@@ -336,37 +339,48 @@ def calc_base_run_sl(gdf):
     # return
     return gdf
 
-# TODO need a baseline version of calc_prac_sed_nl()?
+# TODO baseline groundwater nutrient load (b_gw_nl)
+# hold off on this for now until verify with esmc that it's needed
+
 
 # %% ---- practice change functions ----
+# 
+
 # practice change runoff volume
-def calc_prac_run_v(q, area, rain_days, rd_cor):
+def calc_prac_run_v(gdf):
     '''
     description:
     calculate practice change condition runoff volume (acre-feet)
 
     parameters:
-        q (float): runoff (inches/day), see calc_q function
-        (this depends on calc_p and calc_s functions as well, where
-        cn is for the practice change)
-        area (float): area of field (acres)
-        rain_days (float): average number of rainy days per year
-        rd_cor (float): rain day correction factor
+        gdf (geopandas geodataframe): PLET module geopandas dataframe
+        that must have the following columns:
+            q (float): runoff (inches/day), see calc_q function
+            (this depends on calc_p and calc_s functions as well, where
+            cn_value is for the practice change)
+            area_ac (float): area of field (acres)
+            rain_days (float): average number of rainy days per year
+            rd_cor (float): rain day correction factor
 
     returns:
-        b_run_v (float): runoff volume (acre-feet)
+        p_run_v (float): runoff volume (acre-feet), as a new column in
+        gdf
     '''
     # convert inches to feet
-    q_ft = q/12
+    q_ft = gdf['q']/12
+
+    # TODO q will need to change with CN change for practice change
 
     # calculate p
-    p_run_v = q_ft * area * (rain_days * rd_cor)
+    gdf['p_run_v'] = q_ft * gdf['area_ac'] * (gdf['rain_days'] * gdf['rd_cor'])
 
     # return
-    return p_run_v
+    return gdf
+
+    # TODO need to finalize this function! for select BMPS
 
 # practice change runoff sediment-bound nutrient load (reduction)
-def calc_prac_sed_nl(b_run_nl, erosion, area, bmp_eff, soil_conc):
+def calc_prac_sed_nl(gdf):
     '''
     description:
     calculate practice change condition sediment-bound nutrient load
@@ -374,38 +388,60 @@ def calc_prac_sed_nl(b_run_nl, erosion, area, bmp_eff, soil_conc):
     phosphorus and for either cropped land or grazed land/pastureland
 
     parameters:
-        b_run_nl (float): baseline annual runoff load for *either* 
-        nitrogen or phosphorus (lbs)
-        erosion (float): sediment loss due to sheet and rill 
-        erosion (tons/year), see erosion function
-        area (float): area of field (acres)
-        bmp_eff (float): bmp efficiency
-        soil_conc (float): soil nutrient concentration for *either*
-        nitrogen or phosphorus (decimal percent)
+        gdf (geopandas geodataframe): PLET module geopandas dataframe
+        that must have the following columns:
+            b_run_n (float): baseline annual runoff load for nitrogen (lbs)
+            b_run_p (float): baseline annual runoff load for phosphorus (lbs)
+            erosion (float): sediment loss due to sheet and rill 
+            erosion (tons/year), see erosion function
+            area_ac (float): area of field (acres)
+            eff_val_nitrogen (float): bmp efficiency for nitrogen
+            eff_val_phophorus (float): bmp efficiency for phosphorus
+            eff_val_sediment (float): bmp efficiency for sediment
+            soil_conc (float): soil nutrient concentration for *either*
+            nitrogen or phosphorus (decimal percent)
 
     returns:
-        p_sed_nl (float): practice change sediment-bound nutrient
-        load (lbs)
+        e_lbs (float): sediment loss due to sheet and rill erosion (lbs/year
+        p_sed_n (float): practice change sediment-bound nitrogen load
+        (lbs), as a new column in gdf
+        p_sed_p (float): practice change sediment-bound phosphorus
+        load (lbs), as a new column in gdf
     '''
-    # area cutoff
-    area_cutoff = 200 # TODO acres?? - check units!
-
-    # sediment delivery ratio
-    # if less than area_cutoff
-    if area <= area_cutoff:
-        del_ratio = 0.42 * area**(-0.125)
-        
-    # else if greater than area_cutoff
-    else:
-        del_ratio = (0.417662 * area**(-0.134958)) - 0.127097
-
     # TODO check if separate calc for pasture vs crop!
 
     # convert tons to lbs
-    e_lbs = erosion * 2000
+    gdf['e_lbs'] = gdf['erosion'] * 2000
 
-    # calculate
-    p_sed_nl = e_lbs * del_ratio * (1 - bmp_eff) * soil_conc
+    # hard code soil concentrations (percent)
+    soil_conc_n = 0.08
+    soil_conc_p = 0.16
+
+    # TODO can we update soil P and N concentrations by site?
+
+    # calculate sediment-bound nutrient loads
+    gdf = gdf.reset_index(drop = True)
+    for index, row in gdf.iterrows():
+        # sediment-bound nitrogen load
+        # no efficiency value
+        if np.isnan(row['eff_val_nitrogen']):
+            gdf.loc[index, 'p_sed_n'] = np.nan
+
+        # if has efficiency value
+        else:
+            gdf.loc[index, 'p_sed_n'] = row['e_lbs'] * row['del_ratio'] * (1 - row['eff_val_nitrogen']) * soil_conc_n
+            
+        # sediment-bound phosphorus load
+        # no efficiency value
+        if np.isnan(row['eff_val_phosphorus']):
+            gdf.loc[index, 'p_sed_p'] = np.nan
+
+        # if has efficiency value
+        else:
+            gdf.loc[index, 'p_sed_p'] = row['e_lbs'] * row['del_ratio'] * (1 - row['eff_val_phosphorus']) * soil_conc_p
+
+    # return
+    return gdf
 
 # practice change runoff nutrient load
 def calc_prac_run_nl(b_run_nl, bmp_eff, p_sed_nl):
@@ -423,9 +459,31 @@ def calc_prac_run_nl(b_run_nl, bmp_eff, p_sed_nl):
         see calc_prac_sed_nl function
 
     returns:
-        p_run_nl (float): practice change runoff nutrient load (lbs)
+        p_run_n (float): practice change runoff nitrogen load (lbs),
+        as a new column in gdf
+        p_run_p (float): practice change runoff phosphorus load (lbs),
+        as a new column in gdf
     '''
-    # calculate
-    p_run_nl = b_run_nl * bmp_eff + p_sed_nl # TODO check this!
+    # calculate practice change nutrient loads
+    gdf = gdf.reset_index(drop = True)
+    for index, row in gdf.iterrows():
+        # practice change runoff nitrogen load
+        # no efficiency value
+        if np.isnan(row['eff_val_nitrogen']):
+            gdf.loc[index, 'p_run_n'] = np.nan
 
+        # if has efficiency value
+        else:
+            gdf.loc[index, 'p_run_n'] = row['b_run_n'] * row['eff_val_nitrogen'] + row['p_sed_n']
 
+        # practice change runoff phosphorus load
+        # no efficiency value
+        if np.isnan(row['eff_val_phosphorus']):
+            gdf.loc[index, 'p_run_p'] = np.nan
+
+        # if has efficiency value
+        else:
+            gdf.loc[index, 'p_run_p'] = row['b_run_p'] * row['eff_val_phosphorus'] + row['p_sed_p']
+
+    # return
+    return gdf
