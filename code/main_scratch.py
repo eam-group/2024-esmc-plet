@@ -193,6 +193,7 @@ field_data_inf = field_data_man.merge(
 # insert code to calculate and add columns:
 # conc_gw
 field_data_gw = field_data_inf  # for now
+# TODO fix this
 
 # add bmp efficiency value column
 # get unique hsg values for fields
@@ -273,12 +274,17 @@ bruns_gdf = plet.calc_base_run_sl(e_gdf)
 # bruns_gdf['b_run_sl']
 
 # calculate practice change runoff volume
+prunv_gdf = bruns_gdf  # for now
+# TODO fix this
 
+# calculate practice change sediment-bound nutrient load
+psed_gdf = plet.calc_prac_sed_nl(prunv_gdf)
 
-# calculate practice change runoff nutrient load (for n and p)
+# check
+# psed_gdf.columns
+
+# calculate practice change runoff nutrient load
 
 
 # calculate practice change runoff sediment load
 
-
-#
