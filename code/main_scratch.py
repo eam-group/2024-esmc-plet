@@ -13,6 +13,14 @@
 
 
 # to do:
+# how to handle multiple types of animals? > current script only considers one animal type (beef cattle)
+# how to handle practice change water quanity calcs?
+# how to handle fractional area of bmp implementation? > stepl reduces efficiency by the percentage of the area so 0.50 efficiency is reduced to 0.25 if only 50% of the field area is covered by the bmp
+# test other fields
+
+# potential bonus add-ons?:
+# how do we handle irrigation water quantity and quality?
+# how to handle gw practice change calcs? > could use plet equations to determine baseline but plet doesn't seem to estimate practice change impact on gw loads (just surface water loads)
 
 
 # %% ---- load libraries ----
@@ -284,7 +292,33 @@ psed_gdf = plet.calc_prac_sed_nl(prunv_gdf)
 # psed_gdf.columns
 
 # calculate practice change runoff nutrient load
+prunl_gdf = plet.calc_prac_run_nl(psed_gdf)
 
+# check
+# prunl_gdf.columns
+# prunl_gdf['p_run_n']
+# prunl_gdf['p_run_p']
 
 # calculate practice change runoff sediment load
+pruns_gdf = plet.calc_prac_run_sl(prunl_gdf)
 
+# check
+# pruns_gdf.columns
+# pruns_gdf['p_run_s']
+
+# check field 1
+# del_ratio matches stepl
+# erosion matches stepl
+# b_run_s matches stepl
+# p_run_s matches stepl
+# p matches stepl
+# q matches stepl
+# b_run_v matches stepl
+# b_in_v matches stepl
+# b_run_n matches stepl
+# conc_n, conc_nm, conc_p, conc_mp all match stepl
+# p_run_n matches stepl
+# b_run_p matches stepl
+# p_run_p matches stepl
+
+# check field 4
