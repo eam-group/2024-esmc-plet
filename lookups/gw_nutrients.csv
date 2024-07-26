@@ -1,7 +1,7 @@
-﻿land_use,nutrient,gw_conc_mgl
+land_use,nutrient,gw_conc_mgl
 cropland,nitrogen,1.440
-cropland,phosphorus,1.440
-pastureland,nitrogen,0.063
+cropland,phosphorus,0.063
+pastureland,nitrogen,1.440
 pastureland,phosphorus,0.063
 forest,nitrogen,0.11
 forest,phosphorus,0.009
