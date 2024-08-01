@@ -40,7 +40,7 @@ def calc_p(gdf):
     returns:
         p (float): rainfall per event (inches), as a new column in gdf
     '''
-    # calculate p
+    # calculate
     gdf['p'] = (gdf['aa_rain'] * gdf['r_cor'])/(gdf['rain_days'] * gdf['rd_cor'])
 
     # return
@@ -63,7 +63,7 @@ def calc_s(gdf):
         s (float): potential maximum water retention after runoff 
         begins (inches), as a new column in gpf
     '''
-    # calculate p
+    # calculate
     gdf['s'] = (1000 / gdf['cn_value']) - 10
 
     # return
@@ -85,7 +85,7 @@ def calc_q(gdf):
     returns:
         q (float): runoff (inches/day), as a new column in gdf
     '''
-    # calculate p
+    # calculate
     gdf['q'] = (gdf['p']**2)/(gdf['p'] + gdf['s'])
 
     # return
@@ -139,18 +139,18 @@ def calc_animal_stats(gdf, animal_type = 'beef_cattle'):
         # calculate animal intensity
         gdf = gdf.reset_index(drop = True)
         for index, row in gdf.iterrows():
-            if (row['animal_den'] <= 1500):
+            if ((row['animal_aeu'] > 0) | (row['animal_aeu'] <= 1.5)):
                 gdf.loc[index, 'animal_inten'] = 'low'
             
-            elif ((row['animal_den'] > 1500) | (row['animal_den'] < 2500)):
+            elif ((row['animal_aeu'] > 1.5) | (row['animal_aeu'] < 2.5)):
                 gdf.loc[index, 'animal_inten'] = 'medium'
 
-            elif (row['animal_den'] >= 2500):
+            elif (row['animal_aeu'] >= 2.5):
                 gdf.loc[index, 'animal_inten'] = 'high'
 
             else:
                 gdf.loc[index, 'animal_inten'] = np.nan
-                print("intensity is outside of defined range")
+                print("intensity is zero or outside of defined range")
 
     # if not beef cattle
     else:
@@ -160,21 +160,8 @@ def calc_animal_stats(gdf, animal_type = 'beef_cattle'):
         # calculate animal equivalent units
         gdf['animal_aeu'] =  np.nan
 
-        gdf = gdf.reset_index(drop = True)
-        for index, row in gdf.iterrows():
-            if ((row['animal_den'] >= 0) | (row['animal_den'] <= 1500)):
-                gdf.loc[index, 'animal_inten'] = np.nan
-            
-            elif ((row['animal_den'] > 1500) | (row['animal_den'] < 2500)):
-                gdf.loc[index, 'animal_inten'] = np.nan
-
-            elif (row['animal_den'] >= 2500):
-                gdf.loc[index, 'animal_inten'] = np.nan
-
-            else:
-                gdf.loc[index, 'animal_inten'] = np.nan
-                print("intensity is outside of defined range")
-
+        # calculate animal intensity
+        gdf['animal_inten'] = np.nan
         print("only beef cattle is allowed at this time")
 
     # return
@@ -204,7 +191,7 @@ def calc_base_run_v(gdf):
     # convert inches to feet
     q_ft = gdf['q']/12
 
-    # calculate p
+    # calculate
     gdf['b_run_v'] = q_ft * gdf['area_ac'] * (gdf['rain_days'] * gdf['rd_cor'])
 
     # return
@@ -212,38 +199,6 @@ def calc_base_run_v(gdf):
 
 # baseline irrigation runoff volume (b_irr_v)
 # hold off on this for now until verify with esmc that it's needed
-
-# baseline groundwater infiltration volume
-def calc_base_gw_v(gdf):
-    '''
-    description:
-    calculate baseline shallow groundwater infilatration
-    volume (acre-feet)
-
-    parameters:
-        gdf (geopandas geodataframe): PLET module geopandas dataframe
-        that must have the following columns:
-            gw_infil_frac (float): infiltration fraction
-            p (float): rainfall per event (inches), see calc_p function
-            area_ac (float): area of field (acres)
-            rain_days (float): average number of rainy days per year
-            rd_cor (float): rain day correction factor
-
-    returns:
-        b_in_v (float): baseline shallow groundwater infilatration
-        runoff volume (acre-feet), as a new column in gdf
-    '''
-    # infiltration depth
-    infil = gdf['gw_infil_frac'] * gdf['p']
-
-    # convert inches to feet
-    infil_ft = infil/12
-    
-    # baseline groundwater infiltraiton volume
-    gdf['b_in_v'] = infil_ft * gdf['area_ac'] * (gdf['rain_days'] * gdf['rd_cor'])
-
-    # return
-    return gdf
 
 # baseline runoff nutrient load (for n and p)
 def calc_base_run_nl(gdf):
@@ -362,13 +317,43 @@ def calc_base_run_sl(gdf):
     # return
     return gdf
 
-# TODO baseline groundwater nutrient load (b_gw_nl)
+# baseline groundwater infiltration volume
+def calc_base_gw_v(gdf):
+    '''
+    description:
+    calculate baseline shallow groundwater infilatration
+    volume (acre-feet)
+
+    parameters:
+        gdf (geopandas geodataframe): PLET module geopandas dataframe
+        that must have the following columns:
+            gw_infil_frac (float): infiltration fraction
+            p (float): rainfall per event (inches), see calc_p function
+            area_ac (float): area of field (acres)
+            rain_days (float): average number of rainy days per year
+            rd_cor (float): rain day correction factor
+
+    returns:
+        b_in_v (float): baseline shallow groundwater infilatration
+        runoff volume (acre-feet), as a new column in gdf
+    '''
+    # infiltration depth
+    infil = gdf['gw_infil_frac'] * gdf['p']
+
+    # convert inches to feet
+    infil_ft = infil/12
+    
+    # baseline groundwater infiltraiton volume
+    gdf['b_in_v'] = infil_ft * gdf['area_ac'] * (gdf['rain_days'] * gdf['rd_cor'])
+
+    # return
+    return gdf
+
+# baseline groundwater nutrient load (b_gw_nl)
 # hold off on this for now until verify with esmc that it's needed
 
 
 # %% ---- practice change functions ----
-# 
-
 # practice change runoff volume
 def calc_prac_run_v(gdf):
     '''
@@ -386,21 +371,85 @@ def calc_prac_run_v(gdf):
             rd_cor (float): rain day correction factor
 
     returns:
+        p_cn_value (float): practice change curve number value, as a new
+        column in gdf
         p_run_v (float): runoff volume (acre-feet), as a new column in
         gdf
     '''
-    # convert inches to feet
-    q_ft = gdf['q']/12
+    # calculate practice change runoff volume
+    gdf = gdf.reset_index(drop = True)
+    for index, row in gdf.iterrows():
+        # cover crop bmp list
+        cc_bmp_list = ['cov_crop_1', 'cov_crop_2', 'cov_crop_3']
 
-    # TODO q will need to change with CN change for practice change
+        # if bmp provides water quantity benefits
+        if row['eff_val_quantity'] == 1:
 
-    # calculate p
-    gdf['p_run_v'] = q_ft * gdf['area_ac'] * (gdf['rain_days'] * gdf['rd_cor'])
+            # if cover crop bmp
+            if row['bmp_name'] in cc_bmp_list:
+
+                # recalculate cn
+                gdf.loc[index, 'p_cn_value'] = row['cn_value'] - 3
+                # p_cn_value = row['cn_value'] - 3
+                # source: see table 9-1 in usda nrcs handbook chapter 9
+                # (2004) on crop residue cover for poor and good soil
+                # conditions
+                # assumption: not all cover crop bmps have sediment bmp
+                # efficiency values so using usda nrcs handbook information
+                # instead of the efficiency values as described below for
+                # non-cover crop bmps
+
+                # recalculate s
+                # gdf.loc[index, 'p_s'] = (1000 / gdf.loc[index, 'p_cn_value']) - 10
+                p_s = (1000 / gdf.loc[index, 'p_cn_value']) - 10
+
+                # recalculate q
+                # gdf.loc[index, 'p_q'] = (row['p']**2) / (row['p'] + row['p_s'])
+                p_q = (row['p']**2) / (row['p'] + p_s)
+
+                # convert inches to feet
+                # q_ft = row['p_q'] / 12
+                p_q_ft = p_q / 12
+
+                # calculate
+                gdf.loc[index, 'p_run_v'] = p_q_ft * row['area_ac'] * (row['rain_days'] * row['rd_cor'])
+            
+            # if not cover crop bmp
+            else:
+                 # apply bmp percent applied
+                eff_val_sed_adj = row['eff_val_sediment'] * (row['bmp_ac']/row['area_ac'])
+
+                # recalculate cn
+                gdf.loc[index, 'p_cn_value'] = row['cn_value'] - row['cn_value'] * eff_val_sed_adj
+                # p_cn_value = row['cn_value'] - row['cn_value'] * row['eff_val_sediment']
+                # assumption: assuming that sediment load reductions are
+                # due to decreases in runoff volume so that they are 
+                # directly proportional and can bue used to scale the 
+                # new cn values for practice changes
+
+                # recalculate s
+                # gdf.loc[index, 'p_s'] = (1000 / gdf.loc[index, 'p_cn_value']) - 10
+                p_s = (1000 / gdf.loc[index, 'p_cn_value']) - 10
+
+                # recalculate q
+                # gdf.loc[index, 'p_q'] = (row['p']**2) / (row['p'] + row['p_s'])
+                p_q = (row['p']**2) / (row['p'] + p_s)
+
+                # convert inches to feet
+                # q_ft = row['p_q'] / 12
+                p_q_ft = p_q / 12
+
+                # calculate
+                gdf.loc[index, 'p_run_v'] = p_q_ft * row['area_ac'] * (row['rain_days'] * row['rd_cor'])
+        
+        # if bmp provides no water quantity benefits
+        else:
+            # practice change cn and runoff volume equals baseline
+            gdf.loc[index, 'p_cn_value'] = row['cn_value']
+            gdf.loc[index, 'p_run_v'] = row['b_run_v']
 
     # return
     return gdf
-
-    # TODO need to finalize this function! for select BMPS
 
 # practice change runoff sediment-bound nutrient load (reduction)
 def calc_prac_sed_nl(gdf):
@@ -428,8 +477,6 @@ def calc_prac_sed_nl(gdf):
         p_sed_p (float): practice change sediment-bound phosphorus
         load (lbs), as a new column in gdf
     '''
-    # TODO check if separate calc for pasture vs crop!
-
     # convert tons to lbs
     gdf['e_lbs'] = gdf['erosion'] * 2000
 
@@ -450,7 +497,11 @@ def calc_prac_sed_nl(gdf):
 
         # if has efficiency value
         else:
-            gdf.loc[index, 'p_sed_n'] = row['e_lbs'] * row['del_ratio'] * (1 - row['eff_val_nitrogen']) * soil_conc_n
+            # apply bmp percent applied
+            eff_val_n_adj = row['eff_val_nitrogen'] * (row['bmp_ac']/row['area_ac'])
+
+            # calculate
+            gdf.loc[index, 'p_sed_n'] = row['e_lbs'] * row['del_ratio'] * (1 - eff_val_n_adj) * soil_conc_n
             
         # sediment-bound phosphorus load
         # no efficiency value
@@ -459,7 +510,11 @@ def calc_prac_sed_nl(gdf):
 
         # if has efficiency value
         else:
-            gdf.loc[index, 'p_sed_p'] = row['e_lbs'] * row['del_ratio'] * (1 - row['eff_val_phosphorus']) * soil_conc_p
+            # apply bmp percent applied
+            eff_val_p_adj = row['eff_val_phosphorus'] * (row['bmp_ac']/row['area_ac'])
+
+            # calculate
+            gdf.loc[index, 'p_sed_p'] = row['e_lbs'] * row['del_ratio'] * (1 - eff_val_p_adj) * soil_conc_p
 
     # return
     return gdf
@@ -497,43 +552,58 @@ def calc_prac_run_nl(gdf):
         # if cropland
         if row['user_lu'] == 'cropland':
             # practice change runoff nitrogen load
-            # no efficiency value
+            # if no efficiency value then return baseline condition
             if np.isnan(row['eff_val_nitrogen']):
-                gdf.loc[index, 'p_run_n'] = np.nan
+                gdf.loc[index, 'p_run_n'] = row['b_run_n']
 
             # if has efficiency value
             else:
-                gdf.loc[index, 'p_run_n'] = row['b_run_n'] * row['eff_val_nitrogen']
-                # TODO eventually add in irrigation volume here?
+                # apply bmp percent applied
+                eff_val_n_adj = row['eff_val_nitrogen'] * (row['bmp_ac']/row['area_ac'])
+                
+                # calculate
+                gdf.loc[index, 'p_run_n'] = row['b_run_n'] * eff_val_n_adj
 
             # practice change runoff phosphorus load
-            # no efficiency value
+            # if no efficiency value then return baseline condition
             if np.isnan(row['eff_val_phosphorus']):
-                gdf.loc[index, 'p_run_p'] = np.nan
+                gdf.loc[index, 'p_run_p'] = row['b_run_p']
 
             # if has efficiency value
             else:
-                gdf.loc[index, 'p_run_p'] = row['b_run_p'] * row['eff_val_phosphorus']
+                # apply bmp percent applied
+                eff_val_p_adj = row['eff_val_phosphorus'] * (row['bmp_ac']/row['area_ac'])
+                
+                # calculate
+                gdf.loc[index, 'p_run_p'] = row['b_run_p'] * eff_val_p_adj
 
         # if pastureland
         elif row['user_lu'] == 'pastureland':
             # practice change runoff nitrogen load
-            # no efficiency value
+            # if no efficiency value then return baseline condition
             if np.isnan(row['eff_val_nitrogen']):
-                gdf.loc[index, 'p_run_n'] = np.nan
+                gdf.loc[index, 'p_run_n'] =  row['b_run_n']
 
             # if has efficiency value
             else:
-                gdf.loc[index, 'p_run_n'] = row['b_run_n'] * row['eff_val_nitrogen'] + row['p_sed_n']
+                # apply bmp percent applied
+                eff_val_n_adj = row['eff_val_nitrogen'] * (row['bmp_ac']/row['area_ac'])
+                
+                # calculate
+                gdf.loc[index, 'p_run_n'] = row['b_run_n'] * eff_val_n_adj + row['p_sed_n']
 
             # practice change runoff phosphorus load
-            # no efficiency value
+            # if no efficiency value then return baseline condition
             if np.isnan(row['eff_val_phosphorus']):
-                gdf.loc[index, 'p_run_p'] = np.nan
+                gdf.loc[index, 'p_run_p'] =  row['b_run_p']
 
             # if has efficiency value
             else:
-                gdf.loc[index, 'p_run_p'] = row['b_run_p'] * row['eff_val_phosphorus'] + row['p_sed_p']
+                # apply bmp percent applied
+                eff_val_p_adj = row['eff_val_phosphorus'] * (row['bmp_ac']/row['area_ac'])
+                
+                # calculate
+                gdf.loc[index, 'p_run_p'] = row['b_run_p'] * eff_val_p_adj + row['p_sed_p']
 
         else:
             # result cannot be determined for other land use types
@@ -565,18 +635,22 @@ def calc_prac_run_sl(gdf):
     gdf = gdf.reset_index(drop = True)
     for index, row in gdf.iterrows():
         # practice change runoff sediment load
-        # no efficiency value
+        # if no efficiency value then return baseline condition
         if np.isnan(row['eff_val_sediment']):
-            gdf.loc[index, 'p_run_s'] = np.nan
+            gdf.loc[index, 'p_run_s'] = row['b_run_s']
 
         # if has efficiency value
         else:
-            gdf.loc[index, 'p_run_s'] = row['erosion'] * row['del_ratio'] * (1 - row['eff_val_sediment'])
+            # apply bmp percent applied
+            eff_val_s_adj = row['eff_val_sediment'] * (row['bmp_ac']/row['area_ac'])
+                
+            # calculate
+            gdf.loc[index, 'p_run_s'] = row['erosion'] * row['del_ratio'] * (1 -eff_val_s_adj)
 
     # return
     return gdf
 
-# TODO practice change groundwater nutrient load (p_gw_nl)
+# practice change groundwater nutrient load (p_gw_nl)
 # hold off on this for now until verify that we can calculate it
 # efficiency valus are for surface water bmp impacts and there might
 # not be a way to estimate practice change impact on gw loads

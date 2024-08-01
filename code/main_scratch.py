@@ -15,12 +15,12 @@
 # to do:
 # how to handle multiple types of animals? > current script only considers one animal type (beef cattle)
 # how to handle practice change water quanity calcs?
-# how to handle fractional area of bmp implementation? > stepl reduces efficiency by the percentage of the area so 0.50 efficiency is reduced to 0.25 if only 50% of the field area is covered by the bmp
 # test other fields
 
-# potential bonus add-ons?:
+
+# potential bonus add-ons? (holding off for now):
 # how do we handle irrigation water quantity and quality?
-# how to handle gw practice change calcs? > could use plet equations to determine baseline but plet doesn't seem to estimate practice change impact on gw loads (just surface water loads)
+# how do we handle gw volume and nutrient load baseline vs practice change calcs? >(hold off?) plet doesn't seem to estimate practice change impact (just baseline) on gw loads
 
 
 # %% ---- load libraries ----
@@ -99,7 +99,8 @@ field_data = field_data_raw.set_crs(albers_epsg, allow_override=True)
 # huc4_num, huc4_name
 
 # add field area
-# field_data_albers['area_ac'] = field_data.area / 4046.86 # 1 ac = 4046.36 m
+# field_data_area['area_ac'] = field_data.area / 4046.86 # 1 ac = 4046.36 m
+field_data_area = field_data # for now
 
 # add prism columns
 # insert code to calculate and add columns:
@@ -107,7 +108,7 @@ field_data = field_data_raw.set_crs(albers_epsg, allow_override=True)
 
 # add usle columns
 # get unique fips values for fields
-fips_list = field_data["fips"].unique().astype("float64")
+fips_list = field_data_area["fips"].unique().astype("float64")
 
 # get subset of usle data based in fips and land use
 usle_lookup_sel = (
@@ -119,7 +120,7 @@ usle_lookup_sel = (
 )
 
 # merge with field data
-field_data_usle = field_data.merge(usle_lookup_sel, how="left", on=["fips", "user_lu"])
+field_data_usle = field_data_area.merge(usle_lookup_sel, how="left", on=["fips", "user_lu"])
 
 # check
 # field_data_usle.columns
@@ -254,13 +255,14 @@ brunv_gdf = plet.calc_base_run_v(q_gdf)
 # brunv_gdf['b_run_v']
 
 # calculate baseline gw infiltration volume
-bgwv_gdf = plet.calc_base_gw_v(brunv_gdf)
+# bgwv_gdf = plet.calc_base_gw_v(brunv_gdf)
+# hold off on this for now
 
 # check
 # bgwv_gdf['b_in_v']
 
 # calculate baseline runoff nutrient load (for n and p)
-brunl_gdf = plet.calc_base_run_nl(bgwv_gdf)
+brunl_gdf = plet.calc_base_run_nl(brunv_gdf)
 
 # check
 # brunl_gdf.columns
@@ -282,8 +284,11 @@ bruns_gdf = plet.calc_base_run_sl(e_gdf)
 # bruns_gdf['b_run_sl']
 
 # calculate practice change runoff volume
-prunv_gdf = bruns_gdf  # for now
-# TODO fix this
+prunv_gdf = plet.calc_prac_run_v(bruns_gdf)
+
+# check
+# prunv_gdf.columns
+# prunv_gdf['p_run_v']
 
 # calculate practice change sediment-bound nutrient load
 psed_gdf = plet.calc_prac_sed_nl(prunv_gdf)
