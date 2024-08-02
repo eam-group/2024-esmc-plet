@@ -457,8 +457,9 @@ def calc_prac_sed_nl(gdf):
     '''
     description:
     calculate practice change condition sediment-bound nutrient load
-    (lbs), can be used to calculate nutrient load for either nitrogen or 
-    phosphorus and for either cropped land or grazed land/pastureland
+    (lbs), can be used to calculate nutrient load for either
+    sediment-bound nitrogen or phosphorus and for either cropped land
+    or grazed land/pastureland
 
     parameters:
         gdf (geopandas geodataframe): PLET module geopandas dataframe

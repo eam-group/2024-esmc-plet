@@ -313,12 +313,14 @@ pruns_gdf = plet.calc_prac_run_sl(prunl_gdf)
 # pruns_gdf['p_run_s']
 
 
+# %% ---- calculate percent change ----
+
 # calculate percent change
 gdf_final = plet.calc_perc_change(pruns_gdf)
 
 # export to check
 df_final = pd.DataFrame(gdf_final)
-df_final.to_csv(proj_path + "/data/scratch/plet_output_test.csv")
+df_final.to_csv(proj_path + "/data/scratch/test_plet_output.csv")
 
 # check
 # gdf_final.columns
