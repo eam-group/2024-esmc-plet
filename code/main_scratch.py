@@ -21,6 +21,7 @@
 # potential bonus add-ons? (holding off for now):
 # how do we handle irrigation water quantity and quality?
 # how do we handle gw volume and nutrient load baseline vs practice change calcs? >(hold off?) plet doesn't seem to estimate practice change impact (just baseline) on gw loads
+# how do we handle multiple bmps on one field?
 
 
 # %% ---- load libraries ----
@@ -310,6 +311,25 @@ pruns_gdf = plet.calc_prac_run_sl(prunl_gdf)
 # check
 # pruns_gdf.columns
 # pruns_gdf['p_run_s']
+
+
+# calculate percent change
+gdf_final = plet.calc_perc_change(pruns_gdf)
+
+# export to check
+df_final = pd.DataFrame(gdf_final)
+df_final.to_csv(proj_path + "/data/scratch/plet_output_test.csv")
+
+# check
+# gdf_final.columns
+# gdf_final['pc_v']
+# gdf_final['pc_n']
+# gdf_final['pc_p']
+# gdf_final['del_ratio']
+# gdf_final['erosion']
+# gdf_final['area_ac']
+# gdf_final['b_run_s']
+# gdf_final['pc_s']
 
 # check field 1
 # del_ratio matches stepl
