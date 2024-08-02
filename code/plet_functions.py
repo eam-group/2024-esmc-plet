@@ -17,7 +17,7 @@
 
 # to do:
 
-# % ---- load libraries ----
+# %% ---- load libraries ----
 import numpy as np
 
 
@@ -38,7 +38,7 @@ def calc_p(gdf):
             rd_cor (float): rain day correction factor
 
     returns:
-        p (float): rainfall per event (inches), as a new column in gdf
+        p (float): rainfall per event (inches/event), as a new column in gdf
     '''
     # calculate
     gdf['p'] = (gdf['aa_rain'] * gdf['r_cor'])/(gdf['rain_days'] * gdf['rd_cor'])
@@ -56,7 +56,7 @@ def calc_s(gdf):
     parameters:
         gdf (geopandas geodataframe): PLET module geopandas dataframe
         that must have the following columns:
-            cn (int): curve number for specific land cover/land use and
+            cn_value (int): curve number for specific land cover/land use and
             it's associated condition (e.g., good or poor)
 
     returns:
@@ -73,17 +73,17 @@ def calc_s(gdf):
 def calc_q(gdf):
     '''
     description:
-    calculate runoff (inches/day)
+    calculate runoff depth (inches/event)
 
     parameters:
         gdf (geopandas geodataframe): PLET module geopandas dataframe
         that must have the following columns:
-            p (float): rainfall per event (inches), see calc_p function
+            p (float): rainfall per event (inches/event), see calc_p function
             s (float): potential maximum water retention after runoff 
             begins (inches), see calc_s function
 
     returns:
-        q (float): runoff (inches/day), as a new column in gdf
+        q (float): runoff depth (inches/event), as a new column in gdf
     '''
     # calculate
     gdf['q'] = (gdf['p']**2)/(gdf['p'] + gdf['s'])
@@ -168,7 +168,7 @@ def calc_animal_stats(gdf, animal_type = 'beef_cattle'):
     return gdf
 
 
-## %% ---- baseline functions ----
+# %% ---- baseline functions ----
 # baseline runoff volume
 def calc_base_run_v(gdf):
     '''
@@ -178,14 +178,14 @@ def calc_base_run_v(gdf):
     parameters:
         gdf (geopandas geodataframe): PLET module geopandas dataframe
         that must have the following columns:
-            q (float): runoff (inches/day), see calc_q function
+            q (float): runoff depth (inches/event), see calc_q function
             (this depends on calc_p and calc_s functions as well)
             area_ac (float): area of field (acres)
             rain_days (float): average number of rainy days per year
             rd_cor (float): rain day correction factor
 
     returns:
-        b_run_v (float): runoff volume (acre-feet), 
+        b_run_v (float): baseline annual runoff volume (acre-feet), 
         as a new column in gdf
     '''
     # convert inches to feet
@@ -211,7 +211,8 @@ def calc_base_run_nl(gdf):
     parameters:
         gdf (geopandas geodataframe): PLET module geopandas dataframe
         that must have the following columns:
-            b_run_v (float): runoff volume (acre-feet)
+            b_run_v (float): baseline annual runoff volume (acre-feet),
+            see calc_base_run_v function
             n_months (float): number of months manure is applied
             conc_n (float): concentration of the nitrogen in runoff 
             *not* during manure application (mg/L)
@@ -270,21 +271,21 @@ def calc_e(gdf):
 def calc_base_run_sl(gdf):
     '''
     description:
-    calculate baseline sediment load in runoff due to sheet and rill
-    erosion (tons/year)
+    calculate baseline annual sediment load in runoff due to sheet
+    and rill erosion (tons)
 
     parameters:
         gdf (geopandas geodataframe): PLET module geopandas dataframe
         that must have the following columns:
-            erosion (float): sediment loss due to erosion (tons/year), 
+            erosion (float): sediment loss due to erosion (tons), 
             see calc_e function
             area_ac (float): area of field
 
     returns:
         del_ratio (float): sediment delivery ratio (unitless), as a new
         column in gdf
-        b_run_s (float): baseline sediment loss in runoff due to
-        sheet and rill erosion (tons/year), as a new column in gdf
+        b_run_s (float): baseline annual sediment loss in runoff due to
+        sheet and rill erosion (tons), as a new column in gdf
     '''
     # area cutoff
     area_cutoff = 200
@@ -328,7 +329,7 @@ def calc_base_gw_v(gdf):
         gdf (geopandas geodataframe): PLET module geopandas dataframe
         that must have the following columns:
             gw_infil_frac (float): infiltration fraction
-            p (float): rainfall per event (inches), see calc_p function
+            p (float): rainfall per event (inches/event), see calc_p function
             area_ac (float): area of field (acres)
             rain_days (float): average number of rainy days per year
             rd_cor (float): rain day correction factor
@@ -341,7 +342,7 @@ def calc_base_gw_v(gdf):
     infil = gdf['gw_infil_frac'] * gdf['p']
 
     # convert inches to feet
-    infil_ft = infil/12
+    infil_ft = infil / 12
     
     # baseline groundwater infiltraiton volume
     gdf['b_in_v'] = infil_ft * gdf['area_ac'] * (gdf['rain_days'] * gdf['rd_cor'])
@@ -363,7 +364,7 @@ def calc_prac_run_v(gdf):
     parameters:
         gdf (geopandas geodataframe): PLET module geopandas dataframe
         that must have the following columns:
-            q (float): runoff (inches/day), see calc_q function
+            q (float): runoff depth (inches/event), see calc_q function
             (this depends on calc_p and calc_s functions as well, where
             cn_value is for the practice change)
             area_ac (float): area of field (acres)
@@ -373,8 +374,8 @@ def calc_prac_run_v(gdf):
     returns:
         p_cn_value (float): practice change curve number value, as a new
         column in gdf
-        p_run_v (float): runoff volume (acre-feet), as a new column in
-        gdf
+        p_run_v (float): practice change annual runoff volume (acre-feet),
+        as a new column in gdf
     '''
     # calculate practice change runoff volume
     gdf = gdf.reset_index(drop = True)
@@ -462,9 +463,11 @@ def calc_prac_sed_nl(gdf):
     parameters:
         gdf (geopandas geodataframe): PLET module geopandas dataframe
         that must have the following columns:
-            del_ratio (float): sediment delivery ratio (unitless)
+            del_ratio (float): sediment delivery ratio (unitless),
+            see calc_base_run_sl function (this also depends on the 
+            calc_c function)
             erosion (float): sediment loss due to sheet and rill 
-            erosion (tons/year), see erosion function
+            erosion (tons/year), see calc_e function
             eff_val_nitrogen (float): bmp efficiency for nitrogen
             eff_val_phophorus (float): bmp efficiency for phosphorus
             soil_conc_n (float): soil nitrogen concentration (percent)
@@ -485,7 +488,7 @@ def calc_prac_sed_nl(gdf):
     soil_conc_p = 0.0308
     # TODO check whether need to divide by 100 here
 
-    # TODO can we update soil P and N concentrations by site?
+    # TODO add soil p and n concentrations provided by the user here
 
     # calculate sediment-bound nutrient loads
     gdf = gdf.reset_index(drop = True)
@@ -530,21 +533,23 @@ def calc_prac_run_nl(gdf):
     parameters:
         gdf (geopandas geodataframe): PLET module geopandas dataframe
         that must have the following columns:
-            b_run_n (float): baseline annual runoff load for nitrogen (lbs)
-            b_run_p (float): baseline annual runoff load for phosphorus (lbs)
+            b_run_n (float): baseline annual runoff load for nitrogen (lbs),
+            see calc_base_run_nl function
+            b_run_p (float): baseline annual runoff load for phosphorus (lbs),
+            see calc_base_run_nl function
             eff_val_nitrogen (float): bmp efficiency for nitrogen
             eff_val_phophorus (float): bmp efficiency for phosphorus
             eff_val_sediment (float): bmp efficiency for sediment
             p_sed_n (float): practice change sediment-bound nitrogen
-            load (lbs)
+            load (lbs), see calc_prac_sed_nl function
             p_sed_p (float): practice change sediment-bound phosphorus
-            load (lbs)
+            load (lbs), see calc_prac_sed_nl function
 
     returns:
-        p_run_n (float): practice change runoff nitrogen load (lbs),
-        as a new column in gdf
-        p_run_p (float): practice change runoff phosphorus load (lbs),
-        as a new column in gdf
+        p_run_n (float): practice change annual runoff nitrogen load
+        (lbs), as a new column in gdf
+        p_run_p (float): practice change annual runoff phosphorus load
+        (lbs), as a new column in gdf
     '''
     # calculate practice change nutrient loads
     gdf = gdf.reset_index(drop = True)
@@ -623,13 +628,15 @@ def calc_prac_run_sl(gdf):
     parameters:
         gdf (geopandas geodataframe): PLET module geopandas dataframe
         that must have the following columns:
-            del_ratio (float): sediment delivery ratio (unitless)
-            erosion (float): sediment loss due to sheet and rill 
-            erosion (tons/year)
+            del_ratio (float): sediment delivery ratio (unitless),
+            see calc_base_run_sl function (this also depends on the 
+            calc_c function)
+            erosion (float): annual sediment loss due to sheet and rill 
+            erosion (tons), see calc_e function
             eff_val_sediment (float): bmp efficiency for sediment
     returns:
-        p_run_s (float): practice change runoff sediment load (tons),
-        as a new column in gdf
+        p_run_s (float): practice change annual runoff sediment load
+        (tons), as a new column in gdf
     '''
     # calculate practice change nutrient loads
     gdf = gdf.reset_index(drop = True)
@@ -654,3 +661,81 @@ def calc_prac_run_sl(gdf):
 # hold off on this for now until verify that we can calculate it
 # efficiency valus are for surface water bmp impacts and there might
 # not be a way to estimate practice change impact on gw loads
+
+# %% ---- calculate change function ----
+# percent change function
+def calc_perc_change(gdf):
+    '''
+    description:
+    calculate the annual percent change from the baseline to practice
+    change conditions for all variables (runoff, nitrogen loads, phosphorus
+    loads, and sediment loads), ranges from 0% to 100%
+
+    parameters:
+        gdf (geopandas geodataframe): PLET module geopandas dataframe
+        that must have the following columns:
+            b_run_v (float): baseline annual runoff volume (acre-feet)
+            b_run_n (float): baseline annual runoff nitrogen load (lbs)
+            b_run_p (float): baseline annual runoff phosphorus load (lbs)
+            b_run_s (float): baseline annual sediment loss in runoff due to
+            sheet and rill erosion (tons)
+            p_run_v (float): practice change annual runoff volume (acre-feet)
+            p_run_n (float): practice change annual runoff nitrogen load (lbs)
+            p_run_p (float): practice change annual runoff phosphorus load (lbs)
+            p_run_s (float): practice change annual sediment loss in
+            runoff due to sheet and rill erosion (tons)
+    returns:
+        pc_v (float): percent change in runoff volume (%),
+        as a new column in gdf
+        pc_n (float): percent change in nitrogen load (%),
+        as a new column in gdf
+        pc_p (float): percent change in phosphorus load (%),
+        as a new column in gdf
+        pc_s (float): percent change in sediment load (%),
+        as a new column in gdf
+    '''
+    # calcuate percent changes for all variables
+    gdf = gdf.reset_index(drop = True)
+    for index, row in gdf.iterrows():
+        # calculate percent change in runoff
+        # if baseline is greater than zero
+        if (row['b_run_v'] > 0):
+            gdf.loc[index, 'pc_v'] = round(((row['b_run_v'] - row['p_run_v']) / row['b_run_v']) * 100, 1)
+
+        # if baseline is equal to or less than zero
+        else:
+            gdf.loc[index, 'pc_v'] = np.nan
+            print("baseline runoff volume is either equal to or less than zero or is not defined, so percent change cannot be calculated. nan will be returned.")
+
+        # calculate percent change in nitrogen load
+        # if baseline is greater than zero
+        if (row['b_run_n'] > 0):
+            gdf.loc[index, 'pc_n'] = round(((row['b_run_n'] - row['p_run_n']) / row['b_run_n']) * 100, 1)
+
+        # if baseline is equal to or less than zero
+        else:
+            gdf.loc[index, 'pc_n'] = np.nan
+            print("baseline nitrogen load is either equal to or less than zero or is not defined, so percent change cannot be calculated. nan will be returned.")
+
+        # calculate percent change in phosphorus load
+        # if baseline is greater than zero
+        if (row['b_run_p'] > 0):
+            gdf.loc[index, 'pc_p'] = round(((row['b_run_p'] - row['p_run_p']) / row['b_run_p']) * 100, 1)
+
+        # if baseline is equal to or less than zero
+        else:
+            gdf.loc[index, 'pc_p'] = np.nan
+            print("baseline phosphorus load is either equal to or less than zero or is not defined, so percent change cannot be calculated. nan will be returned.")
+
+        # calculate percent change in sediment load
+        # if baseline is greater than zero
+        if (row['b_run_s'] > 0):
+            gdf.loc[index, 'pc_s'] = round(((row['b_run_s'] - row['p_run_s']) / row['b_run_s']) * 100, 1)
+
+        # if baseline is equal to or less than zero
+        else:
+            gdf.loc[index, 'pc_s'] = np.nan
+            print("baseline sediment load is either equal to or less than zero or is not defined, so percent change cannot be calculated. nan will be returned.")
+
+    # return
+    return gdf
