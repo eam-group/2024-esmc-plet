@@ -16,12 +16,12 @@
 # how to reference the lookup tables on the server?
 # how to handle multiple types of animals? > current script only considers one animal type (beef cattle)
 # how to handle practice change water quanity calcs?
-# test other fields
+# check that plet module values match stepl values
+# send all messages to stdout
 
-
-# potential bonus add-ons? (holding off for now):
+# potential bonus add-ons (holding off for now):
 # how do we handle irrigation water quantity and quality?
-# how do we handle gw volume and nutrient load baseline vs practice change calcs? >(hold off?) plet doesn't seem to estimate practice change impact (just baseline) on gw loads
+# how do we handle gw infiltration volume and gw nutrient load baseline vs practice change calcs? > (hold off?) plet doesn't seem to estimate practice change impact (just baseline) on gw loads
 # how do we handle multiple bmps on one field?
 
 
@@ -29,11 +29,15 @@
 # import libraries
 import geopandas as gpd
 import pandas as pd
-import os, random, json
+import numpy as np
+import os, random, json, sys, importlib
 from flask import Flask, request, jsonify
 
 # custom plet functions
 import plet_functions as plet
+
+# reimport for testing plet functions
+# importlib.reload(plet)
 
 
 # %% ---- plet module ----
@@ -67,7 +71,7 @@ def run_plet(plet_project_path, gdf_epsg="EPSG:5070"):
     # TODO need to fix these paths for app functionality (ask b)
 
     # define output data path
-    output_data_path = data_path + "fields/"
+    output_data_path = data_path + "scratch//test_plet_output.geojson"
     # TODO need to fix these paths for app functionality (ask b)
 
     # input field data
@@ -84,8 +88,6 @@ def run_plet(plet_project_path, gdf_epsg="EPSG:5070"):
     animal_wts_lookup = pd.read_csv(str(lookup_path + "animal_wts.csv"))
     bmp_eff_lookup = pd.read_csv(str(lookup_path + "bmp_eff_vals.csv"))
     cn_val_lookup = pd.read_csv(str(lookup_path + "cn.csv"))
-    gw_infil_lookup = pd.read_csv(str(lookup_path + "gw_infil_frac.csv"))
-    gw_nutr_lookup = pd.read_csv(str(lookup_path + "gw_nutrients.csv"))
     lu_lookup = pd.read_csv(str(lookup_path + "lu.csv"))
     runoff_nutr_lookup = pd.read_csv(str(lookup_path + "runoff_nutrients.csv"))
     usle_lookup = pd.read_csv(str(lookup_path + "usle.csv"))
@@ -178,35 +180,43 @@ def run_plet(plet_project_path, gdf_epsg="EPSG:5070"):
     )
 
     # calculate p
+    field_gdf_p = plet.calc_p(field_gdf_bmp)
 
     # calculate s
+    field_gdf_p = plet.calc_s(field_gdf_p)
 
     # calculate q
+    field_gdf_q = plet.calc_q(field_gdf_p)
 
     # calculate baseline runoff volume
+    field_gdf_brv = plet.calc_base_run_v(field_gdf_q)
 
     # calculate baseline runoff nutrient load (for n and p)
+    field_gdf_brn = plet.calc_base_run_nl(field_gdf_brv)
 
     # calculate sediment loss from uniform erosion
+    field_gdf_e = plet.calc_e(field_gdf_brn)
 
     # calculate baseline runoff sediment load
+    field_gdf_brs = plet.calc_base_run_sl(field_gdf_e)
 
     # calculate practice change runoff volume
+    field_gdf_prv = plet.calc_prac_run_v(field_gdf_brs)
 
     # calculate practice change sediment-bound nutrient load
+    field_gdf_psb = plet.calc_prac_sed_nl(field_gdf_prv)
 
     # calculate practice change runoff nutrient load (for n and p)
+    field_gdf_prn = plet.calc_prac_run_nl(field_gdf_psb)
 
     # calculate practice change runoff sediment load
+    field_gdf_prs = plet.calc_prac_run_sl(field_gdf_prn)
 
     # calculate percent change
+    field_gdf_final = plet.calc_perc_change(field_gdf_prs)
 
     # export
+    field_gdf_final.to_file(output_data_path)
 
     # return
-    return gdf
-
-    # notes from b
-    # gdf = gpd.GeoDataFrame(gdf_input))
-    # calc_p(gdf, 'n_animals', 'n_animals', 'n_animals', 'n_animals')
-    # gdf.to_file(r'E:\Project Work\ESMC\02_Year 2\PLET_buildout\data\test_field_file_output234.geojson')
+    return field_gdf_final
