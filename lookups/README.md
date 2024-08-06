@@ -27,3 +27,7 @@ contact email saia.sheila@tetratech.com
 9. `runoff_nutrients.csv` - This lookup table is from PLET online tool "Additional Reference Tables" > Table #7.
 
 10. `usle.csv` - This lookup table is from STEPL tool > Support folder > "USLEbyLU.csv".
+
+11. `usle_testing.csv` - This lookup table has USLE values taken directly from the STEPL spreadsheet sent to us from Aileen Molloy. The values are different from `usle.csv` so it's being used for testing purposes only.
+
+12. `bmp_eff_vals_testing.csv` - This lookup table has USLE values taken directly from the STEPL spreadsheet sent to us from Aileen Molloy. The values are different from `bmp_eff_vals.csv` so it's being used for testing purposes only.
