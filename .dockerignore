@@ -6,9 +6,13 @@ __pycache__
 .Python
 .cache
 **/cache
+**/__pycache__
 
 # ignore spyder stuff
 **/.spyproject
+
+# ignore vs code stuff
+**/.vscode
 
 # ignore git file
 .git
