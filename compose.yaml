@@ -1,0 +1,12 @@
+version: "3"
+
+services:
+
+  plet-module:
+    container_name: plet-module
+    build:   
+      dockerfile: Dockerfile
+    volumes:
+      - "/data"
+    ports:
+      - "2000"
