@@ -16,7 +16,9 @@ This document is intended to help a developer get up and running with the PLET m
 
 6. [Testing and Debugging](#6-testing-and-debugging)
 
-7. [Contact Information](#7-contact-information)
+7. [Version Control](#7-version-control)
+
+8. [Contact Information](#8-contact-information)
 
 ## 1. Code Structure
 
@@ -71,5 +73,9 @@ This document is intended to help a developer get up and running with the PLET m
 
 
 
-## 7. Contact Information
+## 7. Version Control
+
+
+
+## 8. Contact Information
 
