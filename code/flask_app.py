@@ -19,5 +19,6 @@ def result():
     return jsonify(runall_dict), 200
 
 if __name__ == '__main__':
-    app.run(debug=True, port=2000)
+    app_port = int(os.environ.get('PORT', 2000)) # sms added
+    app.run(debug=True, host='0.0.0.0', port=app_port) # sms edited host and port
     
