@@ -20,11 +20,11 @@ RUN pip install -r requirements.txt
 # listen on port 2000 by default
 # this is the same port that the flask app uses
 # where does this go in the dockerfile?
-EXPOSE 2000
+EXPOSE 8080
 
 # run the application in the container
 # do we need this?
 ENTRYPOINT ["python"]
 
 # run the app
-CMD ["flask_app.py"]
+CMD ["app.py"]
