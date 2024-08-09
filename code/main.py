@@ -14,14 +14,17 @@
 
 # to do:
 # how to reference the lookup tables on the server?
-# how to handle multiple types of animals? > current script only considers one animal type (beef cattle)
+# how to handle multiple types of animals? > current script only
+# considersone animal type (beef cattle)
 # how to handle practice change water quanity calcs?
 # check that plet module values match stepl values
 # send all messages to stdout
 
 # potential bonus add-ons (holding off for now):
 # how do we handle irrigation water quantity and quality?
-# how do we handle gw infiltration volume and gw nutrient load baseline vs practice change calcs? > (hold off?) plet doesn't seem to estimate practice change impact (just baseline) on gw loads
+# how do we handle gw infiltration volume and gw nutrient load
+# baseline vs practice change calcs? > (hold off?) plet doesn't seem to
+# estimate practice change impact (just baseline) on gw loads
 # how do we handle multiple bmps on one field?
 
 
@@ -57,14 +60,11 @@ def run_plet(plet_project_path, gdf_epsg="EPSG:5070"):
     # check function input formats and values
     # TODO add fucticion to run tests
 
-    # define project folder path
-    proj_path = plet_project_path
-
     # define data path
-    data_path = proj_path + "/data/"
+    data_path = plet_project_path + "/data/"
 
     # define lookup data path
-    lookup_path = proj_path + "/lookups/"
+    lookup_path = plet_project_path + "/lookups/"
 
     # define input field data path
     input_data_path = data_path + "fields/test_field_file_output2.geojson"

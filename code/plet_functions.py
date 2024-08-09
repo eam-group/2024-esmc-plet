@@ -16,9 +16,30 @@
 # runoff volumnes (all water quantity stuff) are in units of acre-feet
 
 # to do:
+# TODO talk to b about how to handle user input errors
 
 # %% ---- load libraries ----
 import numpy as np
+from nose.tools import assert_raises
+
+
+# %% ---- testing funcitons ----
+# test if float
+# def test_if_float(x):
+#     return isinstance(x, float)
+#     # note: np.nan will give true
+
+def my_function(x):
+    assert isinstance(x, float), "input is not a float"
+    return x + 2
+    
+# test if string
+# def test_if_str(x):
+#     return isinstance(x, str)
+#     # note: np.nan will give false
+def check_inputs(gdf):
+    print("test")
+
 
 
 # %% ---- general functions ----
@@ -30,8 +51,8 @@ def calc_p(gdf):
     is equal to a day (24-hr) period (source: STEPL "Land&Rain" tab)
 
     parameters:
-        gdf (geopandas geodataframe): PLET module geopandas dataframe
-        that must have the following columns:
+        gdf (geopandas geodataframe): PLET module geodataframe that must
+        have the following columns:
             aa_rain (float): average annual rainfall (inches)
             r_cor (float): rainfall correction factor
             rain_days (float): average number of rainy days per year
@@ -43,8 +64,12 @@ def calc_p(gdf):
     # calculate
     gdf['p'] = (gdf['aa_rain'] * gdf['r_cor'])/(gdf['rain_days'] * gdf['rd_cor'])
 
+    # print
+    print("calculated and appended p to geodataframe")
+
     # return
     return gdf
+
 
 # potential maximum water retention after runoff begins
 def calc_s(gdf):
@@ -54,8 +79,8 @@ def calc_s(gdf):
     begins (inches)
 
     parameters:
-        gdf (geopandas geodataframe): PLET module geopandas dataframe
-        that must have the following columns:
+        gdf (geopandas geodataframe): PLET module geodataframe that must
+        have the following columns:
             cn_value (int): curve number for specific land cover/land use and
             it's associated condition (e.g., good or poor)
 
@@ -66,8 +91,12 @@ def calc_s(gdf):
     # calculate
     gdf['s'] = (1000 / gdf['cn_value']) - 10
 
+    # print
+    print("calculated and appended s to geodataframe")
+
     # return
     return gdf
+
 
 # runoff
 def calc_q(gdf):
@@ -76,8 +105,8 @@ def calc_q(gdf):
     calculate runoff depth (inches/event)
 
     parameters:
-        gdf (geopandas geodataframe): PLET module geopandas dataframe
-        that must have the following columns:
+        gdf (geopandas geodataframe): PLET module geodataframe that must
+        have the following columns:
             p (float): rainfall per event (inches/event), see calc_p function
             s (float): potential maximum water retention after runoff 
             begins (inches), see calc_s function
@@ -88,8 +117,12 @@ def calc_q(gdf):
     # calculate
     gdf['q'] = (gdf['p']**2)/(gdf['p'] + gdf['s'])
 
+    # print
+    print("calculated and appended q to geodataframe")
+
     # return
     return gdf
+
 
 # irrigation runoff (q_irr)
 # hold off on this for now until verify with esmc that it's needed
@@ -111,8 +144,8 @@ def calc_animal_stats(gdf, animal_type = 'beef_cattle'):
     weight, and high intensity is over 2500 lbs/ac of live animal weight
 
     parameters:
-        gdf (geopandas geodataframe): PLET module geopandas dataframe
-        that must have the following columns:
+        gdf (geopandas geodataframe): PLET module geodataframe that must
+        have the following columns:
             n_animals (float): number of animals
             area_ac (float): area of field (acres)
             animal_type (str): type of anaimal
@@ -133,26 +166,46 @@ def calc_animal_stats(gdf, animal_type = 'beef_cattle'):
         # calculate animal density
         gdf['animal_den'] = (gdf['n_animals'] * animal_wt) / gdf['area_ac']
 
+        # print
+        print("calculated and appended animal_den to geodataframe")
+
         # calculate animal equivalent units
         gdf['animal_aeu'] =  gdf['animal_den'] / 1000
+
+        # print
+        print("calculated and appended animal_aeu to geodataframe")
 
         # calculate animal intensity
         gdf = gdf.reset_index(drop = True)
         for index, row in gdf.iterrows():
             if ((row['animal_aeu'] > 0) | (row['animal_aeu'] <= 1.5)):
+                # set to low
                 gdf.loc[index, 'animal_inten'] = 'low'
+
+                # print
+                print("calculated and appended animal_inten to geodataframe")
             
             elif ((row['animal_aeu'] > 1.5) | (row['animal_aeu'] < 2.5)):
+                # set to medium
                 gdf.loc[index, 'animal_inten'] = 'medium'
 
+                # print
+                print("calculated and appended animal_inten to geodataframe")
+
             elif (row['animal_aeu'] >= 2.5):
+                # set to high
                 gdf.loc[index, 'animal_inten'] = 'high'
 
-            else:
-                gdf.loc[index, 'animal_inten'] = np.nan
-                print("intensity is zero or outside of defined range")
+                # print
+                print("calculated and appended animal_inten to geodataframe")
 
-    # if not beef cattle
+            # else set to nan
+            else:
+                # set to nan
+                gdf.loc[index, 'animal_inten'] = np.nan
+                print("calculated and appended animal_inten but it is zero or outside of defined range. nan returned.")
+
+    # else not beef cattle
     else:
         # calculate animal density
         gdf['animal_den'] = np.nan
@@ -162,7 +215,9 @@ def calc_animal_stats(gdf, animal_type = 'beef_cattle'):
 
         # calculate animal intensity
         gdf['animal_inten'] = np.nan
-        print("only beef cattle is allowed at this time")
+
+        # print
+        print("only beef cattle is allowed at this time. nan's returned.")
 
     # return
     return gdf
@@ -176,8 +231,8 @@ def calc_base_run_v(gdf):
     calculate baseline condition runoff volume (acre-feet)
 
     parameters:
-        gdf (geopandas geodataframe): PLET module geopandas dataframe
-        that must have the following columns:
+        gdf (geopandas geodataframe): PLET module geodataframe that must
+        have the following columns:
             q (float): runoff depth (inches/event), see calc_q function
             (this depends on calc_p and calc_s functions as well)
             area_ac (float): area of field (acres)
@@ -194,8 +249,12 @@ def calc_base_run_v(gdf):
     # calculate
     gdf['b_run_v'] = q_ft * gdf['area_ac'] * (gdf['rain_days'] * gdf['rd_cor'])
 
+    # print
+    print("calculated and appended b_run_v to geodataframe")
+
     # return
     return gdf
+        
 
 # baseline irrigation runoff volume (b_irr_v)
 # hold off on this for now until verify with esmc that it's needed
@@ -209,8 +268,8 @@ def calc_base_run_nl(gdf):
     either cropped land or grazed land/pastureland
 
     parameters:
-        gdf (geopandas geodataframe): PLET module geopandas dataframe
-        that must have the following columns:
+        gdf (geopandas geodataframe): PLET module geodataframe that must
+        have the following columns:
             b_run_v (float): baseline annual runoff volume (acre-feet),
             see calc_base_run_v function
             n_months (float): number of months manure is applied
@@ -234,9 +293,15 @@ def calc_base_run_nl(gdf):
 
     # baseline runoff nitrogen load
     gdf['b_run_n'] = gdf['b_run_v'] * ((1 - m_frac) * gdf['conc_n'] + m_frac * gdf['conc_mn']) * (4047 * 0.3048/1000 * 2.2)
+
+    # print
+    print("calculated and appended b_run_n to geodataframe")
     
     # baseline runoff phosphorus load
     gdf['b_run_p'] = gdf['b_run_v'] * ((1 - m_frac) * gdf['conc_p'] + m_frac * gdf['conc_mp']) * (4047 * 0.3048/1000 * 2.2)
+
+    # print
+    print("calculated and appended b_run_p to geodataframe")
 
     # return
     return gdf
@@ -248,8 +313,8 @@ def calc_e(gdf):
     calculate sediment loss due to sheet and rill erosion (tons/year)
 
     parameters:
-        gdf (geopandas geodataframe): PLET module geopandas dataframe
-        that must have the following columns:
+        gdf (geopandas geodataframe): PLET module geodataframe that must
+        have the following columns:
             r_avg (float): RUSLE average rainfall factor
             k_avg (float): RUSLE average soil erodibility factor
             ls_avg (float): RUSLE average topographic factor
@@ -264,6 +329,9 @@ def calc_e(gdf):
     # sediment erosion
     gdf['erosion'] = gdf['r_avg'] * gdf['k_avg'] * gdf['ls_avg'] * gdf['c_avg'] * gdf['p_avg'] * gdf['area_ac']
 
+    # print
+    print("calculated and appended erosion to geodataframe")
+
     # return
     return gdf
 
@@ -275,8 +343,8 @@ def calc_base_run_sl(gdf):
     and rill erosion (tons)
 
     parameters:
-        gdf (geopandas geodataframe): PLET module geopandas dataframe
-        that must have the following columns:
+        gdf (geopandas geodataframe): PLET module geodataframe that must
+        have the following columns:
             erosion (float): sediment loss due to erosion (tons), 
             see calc_e function
             area_ac (float): area of field
@@ -315,6 +383,9 @@ def calc_base_run_sl(gdf):
     # sediment erosion
     gdf['b_run_s'] = gdf['erosion'] * gdf['del_ratio']
 
+    # print
+    print("calculated and appended b_run_s to geodataframe")
+
     # return
     return gdf
 
@@ -326,8 +397,8 @@ def calc_base_gw_v(gdf):
     volume (acre-feet)
 
     parameters:
-        gdf (geopandas geodataframe): PLET module geopandas dataframe
-        that must have the following columns:
+        gdf (geopandas geodataframe): PLET module geodataframe that must
+        have the following columns:
             gw_infil_frac (float): infiltration fraction
             p (float): rainfall per event (inches/event), see calc_p function
             area_ac (float): area of field (acres)
@@ -347,6 +418,9 @@ def calc_base_gw_v(gdf):
     # baseline groundwater infiltraiton volume
     gdf['b_in_v'] = infil_ft * gdf['area_ac'] * (gdf['rain_days'] * gdf['rd_cor'])
 
+    # print
+    print("calculated and appended b_in_v to geodataframe")
+
     # return
     return gdf
 
@@ -362,8 +436,8 @@ def calc_prac_run_v(gdf):
     calculate practice change condition runoff volume (acre-feet)
 
     parameters:
-        gdf (geopandas geodataframe): PLET module geopandas dataframe
-        that must have the following columns:
+        gdf (geopandas geodataframe): PLET module geodataframe that must
+        have the following columns:
             q (float): runoff depth (inches/event), see calc_q function
             (this depends on calc_p and calc_s functions as well, where
             cn_value is for the practice change)
@@ -414,8 +488,11 @@ def calc_prac_run_v(gdf):
 
                 # calculate
                 gdf.loc[index, 'p_run_v'] = p_q_ft * row['area_ac'] * (row['rain_days'] * row['rd_cor'])
+
+                # print
+                print("calculated and appended p_run_v to geodataframe")
             
-            # if not cover crop bmp
+            # else not cover crop bmp
             else:
                  # apply bmp percent applied
                 eff_val_sed_adj = row['eff_val_sediment'] * (row['bmp_ac']/row['area_ac'])
@@ -442,12 +519,18 @@ def calc_prac_run_v(gdf):
 
                 # calculate
                 gdf.loc[index, 'p_run_v'] = p_q_ft * row['area_ac'] * (row['rain_days'] * row['rd_cor'])
+
+                # print
+                print("calculated and appended p_run_v to geodataframe")
         
-        # if bmp provides no water quantity benefits
+        # else bmp provides no water quantity benefits
         else:
             # practice change cn and runoff volume equals baseline
             gdf.loc[index, 'p_cn_value'] = row['cn_value']
             gdf.loc[index, 'p_run_v'] = row['b_run_v']
+
+        # print
+        print("calculated and appended p_run_v to geodataframe. no wq benefits provided.")
 
     # return
     return gdf
@@ -462,8 +545,8 @@ def calc_prac_sed_nl(gdf):
     or grazed land/pastureland
 
     parameters:
-        gdf (geopandas geodataframe): PLET module geopandas dataframe
-        that must have the following columns:
+        gdf (geopandas geodataframe): PLET module geodataframe that must
+        have the following columns:
             del_ratio (float): sediment delivery ratio (unitless),
             see calc_base_run_sl function (this also depends on the 
             calc_c function)
@@ -497,20 +580,32 @@ def calc_prac_sed_nl(gdf):
         # sediment-bound nitrogen load
         # no efficiency value
         if np.isnan(row['eff_val_nitrogen']):
+            # set to nan
             gdf.loc[index, 'p_sed_n'] = np.nan
 
-        # if has efficiency value
+            # print
+            print("no bmp n efficiency value available. nan returned.")
+
+
+        # else has efficiency value
         else:
             # apply bmp percent applied
             eff_val_n_adj = row['eff_val_nitrogen'] * (row['bmp_ac']/row['area_ac'])
 
             # calculate
             gdf.loc[index, 'p_sed_n'] = row['e_lbs'] * row['del_ratio'] * (1 - eff_val_n_adj) * soil_conc_n
+
+            # print
+            print("calculated and appended p_sed_n to geodataframe")
             
         # sediment-bound phosphorus load
         # no efficiency value
         if np.isnan(row['eff_val_phosphorus']):
+            # set to nan
             gdf.loc[index, 'p_sed_p'] = np.nan
+
+            # print
+            print("no bmp p efficiency value available. nan returned.")
 
         # if has efficiency value
         else:
@@ -519,6 +614,9 @@ def calc_prac_sed_nl(gdf):
 
             # calculate
             gdf.loc[index, 'p_sed_p'] = row['e_lbs'] * row['del_ratio'] * (1 - eff_val_p_adj) * soil_conc_p
+
+            # print
+            print("calculated and appended p_sed_p to geodataframe")
 
     # return
     return gdf
@@ -532,8 +630,8 @@ def calc_prac_run_nl(gdf):
     for either cropped land or grazed land/pastureland
 
     parameters:
-        gdf (geopandas geodataframe): PLET module geopandas dataframe
-        that must have the following columns:
+        gdf (geopandas geodataframe): PLET module geodataframe that must
+        have the following columns:
             b_run_n (float): baseline annual runoff load for nitrogen (lbs),
             see calc_base_run_nl function
             b_run_p (float): baseline annual runoff load for phosphorus (lbs),
@@ -560,7 +658,11 @@ def calc_prac_run_nl(gdf):
             # practice change runoff nitrogen load
             # if no efficiency value then return baseline condition
             if np.isnan(row['eff_val_nitrogen']):
+                # set to nan
                 gdf.loc[index, 'p_run_n'] = row['b_run_n']
+
+                # print
+                print("no bmp n efficiency value available. nan returned.")
 
             # if has efficiency value
             else:
@@ -570,10 +672,17 @@ def calc_prac_run_nl(gdf):
                 # calculate
                 gdf.loc[index, 'p_run_n'] = row['b_run_n'] * eff_val_n_adj
 
+                # print
+                print("calculated and appended p_run_n to geodataframe")
+
             # practice change runoff phosphorus load
             # if no efficiency value then return baseline condition
             if np.isnan(row['eff_val_phosphorus']):
+                # set to nan
                 gdf.loc[index, 'p_run_p'] = row['b_run_p']
+
+                # print
+                print("no bmp p efficiency value available. nan returned.")
 
             # if has efficiency value
             else:
@@ -583,14 +692,21 @@ def calc_prac_run_nl(gdf):
                 # calculate
                 gdf.loc[index, 'p_run_p'] = row['b_run_p'] * eff_val_p_adj
 
+                # print
+                print("calculated and appended p_run_p to geodataframe")
+
         # if pastureland
         elif row['user_lu'] == 'pastureland':
             # practice change runoff nitrogen load
             # if no efficiency value then return baseline condition
             if np.isnan(row['eff_val_nitrogen']):
+                # set to baseline
                 gdf.loc[index, 'p_run_n'] =  row['b_run_n']
 
-            # if has efficiency value
+                # print
+                print("no bmp n efficiency available. set to baseline.")
+
+            # else has efficiency value
             else:
                 # apply bmp percent applied
                 eff_val_n_adj = row['eff_val_nitrogen'] * (row['bmp_ac']/row['area_ac'])
@@ -598,12 +714,19 @@ def calc_prac_run_nl(gdf):
                 # calculate
                 gdf.loc[index, 'p_run_n'] = row['b_run_n'] * eff_val_n_adj + row['p_sed_n']
 
+                # print
+                print("calculated and appended p_run_n to geodataframe")
+
             # practice change runoff phosphorus load
             # if no efficiency value then return baseline condition
             if np.isnan(row['eff_val_phosphorus']):
+                # set to baseline
                 gdf.loc[index, 'p_run_p'] =  row['b_run_p']
 
-            # if has efficiency value
+                # print
+                print("no bmp p efficiency value available. set to baseline.")
+
+            # else has efficiency value
             else:
                 # apply bmp percent applied
                 eff_val_p_adj = row['eff_val_phosphorus'] * (row['bmp_ac']/row['area_ac'])
@@ -611,11 +734,15 @@ def calc_prac_run_nl(gdf):
                 # calculate
                 gdf.loc[index, 'p_run_p'] = row['b_run_p'] * eff_val_p_adj + row['p_sed_p']
 
+                # print
+                print("calculated and appended p_run_p to geodataframe")
+
+        # else not cropland or pastureland
         else:
             # result cannot be determined for other land use types
             gdf.loc[index, 'p_run_n'] = np.nan
             gdf.loc[index, 'p_run_p'] = np.nan
-            print("please choose either cropland or pastureland for practice change runoff nutrient load calculations")
+            print("choose cropland or pastureland for practice change runoff nutrient load calculations. nan's returned.")
 
     # return
     return gdf
@@ -627,8 +754,8 @@ def calc_prac_run_sl(gdf):
     calculate practice change condition runoff sediment load (tons)
 
     parameters:
-        gdf (geopandas geodataframe): PLET module geopandas dataframe
-        that must have the following columns:
+        gdf (geopandas geodataframe): PLET module geodataframe that must
+        have the following columns:
             del_ratio (float): sediment delivery ratio (unitless),
             see calc_base_run_sl function (this also depends on the 
             calc_c function)
@@ -645,7 +772,11 @@ def calc_prac_run_sl(gdf):
         # practice change runoff sediment load
         # if no efficiency value then return baseline condition
         if np.isnan(row['eff_val_sediment']):
+            # set to baseline
             gdf.loc[index, 'p_run_s'] = row['b_run_s']
+
+            # print
+            print("no bmp sediment efficiency available. set to baseline.")
 
         # if has efficiency value
         else:
@@ -654,6 +785,9 @@ def calc_prac_run_sl(gdf):
                 
             # calculate
             gdf.loc[index, 'p_run_s'] = row['erosion'] * row['del_ratio'] * (1 -eff_val_s_adj)
+
+            # print
+            print("calculated and appended p_run_s to geodataframe")
 
     # return
     return gdf
@@ -673,8 +807,8 @@ def calc_perc_change(gdf):
     loads, and sediment loads), ranges from 0% to 100%
 
     parameters:
-        gdf (geopandas geodataframe): PLET module geopandas dataframe
-        that must have the following columns:
+        gdf (geopandas geodataframe): PLET module geodataframe that must
+        have the following columns:
             b_run_v (float): baseline annual runoff volume (acre-feet)
             b_run_n (float): baseline annual runoff nitrogen load (lbs)
             b_run_p (float): baseline annual runoff phosphorus load (lbs)
@@ -701,42 +835,67 @@ def calc_perc_change(gdf):
         # calculate percent change in runoff
         # if baseline is greater than zero
         if (row['b_run_v'] > 0):
+            # calculate
             gdf.loc[index, 'pc_v'] = round(((row['b_run_v'] - row['p_run_v']) / row['b_run_v']) * 100, 1)
 
-        # if baseline is equal to or less than zero
+            # print
+            print("calculated and appended pc_v to geodataframe")
+
+        # else baseline is equal to or less than zero
         else:
+            # set to nan
             gdf.loc[index, 'pc_v'] = np.nan
-            print("baseline runoff volume is either equal to or less than zero or is not defined, so percent change cannot be calculated. nan will be returned.")
+
+            # print
+            print("baseline runoff volume is negative, zero, or is not defined. percent change cannot be calculated. nan returned.")
 
         # calculate percent change in nitrogen load
         # if baseline is greater than zero
         if (row['b_run_n'] > 0):
+            # calculate
             gdf.loc[index, 'pc_n'] = round(((row['b_run_n'] - row['p_run_n']) / row['b_run_n']) * 100, 1)
 
-        # if baseline is equal to or less than zero
+            # print
+            print("calculated and appended pc_n to geodataframe")
+
+        # else baseline is equal to or less than zero
         else:
+            # set to nan
             gdf.loc[index, 'pc_n'] = np.nan
-            print("baseline nitrogen load is either equal to or less than zero or is not defined, so percent change cannot be calculated. nan will be returned.")
+
+            # print
+            print("baseline nitrogen load is negative, zero, or is not defined. percent change cannot be calculated. nan returned.")
 
         # calculate percent change in phosphorus load
         # if baseline is greater than zero
         if (row['b_run_p'] > 0):
+            # calculate
             gdf.loc[index, 'pc_p'] = round(((row['b_run_p'] - row['p_run_p']) / row['b_run_p']) * 100, 1)
 
-        # if baseline is equal to or less than zero
+            # print
+            print("calculated and appended pc_p to geodataframe")
+
+        # else baseline is equal to or less than zero
         else:
             gdf.loc[index, 'pc_p'] = np.nan
-            print("baseline phosphorus load is either equal to or less than zero or is not defined, so percent change cannot be calculated. nan will be returned.")
+            print("baseline phosphorus load is negative, zero, or is not defined. percent change cannot be calculated. nan returned.")
 
         # calculate percent change in sediment load
         # if baseline is greater than zero
         if (row['b_run_s'] > 0):
+            # calculate
             gdf.loc[index, 'pc_s'] = round(((row['b_run_s'] - row['p_run_s']) / row['b_run_s']) * 100, 1)
 
-        # if baseline is equal to or less than zero
+            # print
+            print("calculated and appended pc_s to geodataframe")
+
+        # else baseline is equal to or less than zero
         else:
+            # set to nan
             gdf.loc[index, 'pc_s'] = np.nan
-            print("baseline sediment load is either equal to or less than zero or is not defined, so percent change cannot be calculated. nan will be returned.")
+
+            # print
+            print("baseline sediment load is negative, zero, or is not defined. percent change cannot be calculated. nan returned.")
 
     # return
     return gdf
