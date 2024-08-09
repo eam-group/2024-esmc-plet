@@ -78,7 +78,7 @@ def result():
 # run it in debug mode
 if __name__ == '__main__':
     # define the port
-    app_port = int(os.environ.get('PORT', 2000)) # sms added
+    app_port = int(os.environ.get('PORT', 8080)) # sms added
 
     # start web app server/run the app in debug mode
     app.run(debug=True, host='0.0.0.0', port=app_port) # sms edited host and port
