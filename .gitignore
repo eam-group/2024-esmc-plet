@@ -1,5 +1,4 @@
 # spyder files
-.spyderproject
 .spyproject/
 
 # vs code project files
@@ -16,13 +15,13 @@ __pycache__
 # ignore data folders (for now)
 # /data
 /data/scratch
-/data/cdl
-/data/ecoregions
-/data/landcover
-/data/nass
-/data/nhdplusv2
-/data/prism
-/data/soils
+/data/spatial/cdl
+/data/spatial/ecoregions
+/data/spatial/landcover
+/data/spatial/nass
+/data/spatial/nhdplusv2
+/data/spatial/prism
+/data/spatial/soils
 /data/README_template.md
 
 # ignore to_delete folder

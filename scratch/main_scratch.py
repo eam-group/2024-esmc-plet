@@ -67,13 +67,17 @@ field_data_raw = gpd.read_file(field_data_path)
 # lookup tables
 animal_nutr_lookup = pd.read_csv(str(lookup_data_path + "animal_nutrient_ratio.csv"))
 animal_wts_lookup = pd.read_csv(str(lookup_data_path + "animal_wts.csv"))
-bmp_eff_lookup = pd.read_csv(str(lookup_data_path + "bmp_eff_vals.csv"))
+# bmp_eff_lookup = pd.read_csv(str(lookup_data_path + "bmp_eff_vals.csv"))
 cn_val_lookup = pd.read_csv(str(lookup_data_path + "cn.csv"))
 gw_infil_lookup = pd.read_csv(str(lookup_data_path + "gw_infil_frac.csv"))
 gw_nutr_lookup = pd.read_csv(str(lookup_data_path + "gw_nutrients.csv"))
 lu_lookup = pd.read_csv(str(lookup_data_path + "lu.csv"))
 runoff_nutr_lookup = pd.read_csv(str(lookup_data_path + "runoff_nutrients.csv"))
-usle_lookup = pd.read_csv(str(lookup_data_path + "usle.csv"))
+# usle_lookup = pd.read_csv(str(lookup_data_path + "usle.csv"))
+
+# for testing only
+bmp_eff_lookup = pd.read_csv(str(lookup_data_path + "bmp_eff_vals_testing.csv"))
+usle_lookup = pd.read_csv(str(lookup_data_path + "usle_testing.csv"))
 
 
 # %% ---- finalize gdf ----

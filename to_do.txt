@@ -1,0 +1,26 @@
+plet module psuedocode
+
+load data first
+    ensure crs
+    *error handling of all columns w/in loaded data
+        make sure columns are readable (sentence case)
+        make sure all columns are there
+        make sure column types match 
+
+        if you pass all of that move on:
+            append spatial data columns
+                append county and state id (brian)
+                append watershed info
+                append calculated field area
+                append soil info (hsg)
+                append NASS animal counts
+                append PRISM? (or just use plet lookup?)
+            append lookup columns
+                append plet lookups (sheila)
+            run plet functions (sheila)
+            *error handling?
+            return new plet geojson
+
+        else if you fail:
+            write a log to the user whats missing or needs to be corrected
+        

@@ -1,0 +1,24 @@
+# ignore python files
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+.cache
+**/cache
+**/__pycache__
+
+# ignore spyder stuff
+**/.spyproject
+
+# ignore vs code stuff
+**/.vscode
+
+# ignore git file
+.git
+
+# ignore to_delete folder
+**/to_delete
+
+# ignore scratch folder
+**/scratch

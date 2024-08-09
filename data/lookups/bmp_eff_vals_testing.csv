@@ -1,0 +1,5 @@
+land_use,bmp_name,bmp_full_name,eff_val_quantity,eff_val_nitrogen,eff_val_phosphorus,eff_val_sediment
+cropland,forest_buffer_100ft,Buffer - Forest (100ft wide),1,0.478,0.465,0.586
+cropland,cons_till_2,Conservation Tillage 2 (equal or more than 60% Residue),1,0.25,0.69,0.77
+cropland,cov_crop_2,Cover Crop 2 (Group A Traditional Normal Planting Time) (High Till only for TP and Sediment),1,0.20,0.07,0.10
+pastureland,forest_buffer_35ft,Forest Buffer (minimum 35 feet wide),1,0.45,0.40,0.53
