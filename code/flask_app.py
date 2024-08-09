@@ -19,6 +19,8 @@
 # import libraries
 from flask import Flask, request, jsonify, make_response
 import geopandas as gpd
+import os
+import sys
 import json
 
 # custom plet functions
@@ -33,7 +35,16 @@ app = Flask(__name__)
 
 # define the app functions
 def result():
-    # get the 
+    # save the current state of sys.stdout
+    old_stdout = sys.stdout
+
+    # open log file for saving print statements to
+    log_file = open("message.log", "w")
+
+    # define sys.stdout
+    sys.stdout = log_file
+
+    # get the request
     data = request.get_json()   
 
     # convert geojson to geopandas df
@@ -54,9 +65,20 @@ def result():
     # define the response
     response = make_response(jsonify(plet_result_dict), 200) # sms edited
     
+    # reset to the initial state of std.out
+    sys.stdout = old_stdout
+
+    # close the log file
+    log_file.close()
+
     # return
     return response
 
+# if script is run directly (i.e., __name__ is set to __main__)
+# run it in debug mode
 if __name__ == '__main__':
+    # define the port
     app_port = int(os.environ.get('PORT', 2000)) # sms added
+
+    # start web app server/run the app in debug mode
     app.run(debug=True, host='0.0.0.0', port=app_port) # sms edited host and port
