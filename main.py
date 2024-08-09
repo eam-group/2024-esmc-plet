@@ -97,19 +97,11 @@ def run_plet(plet_project_path, gdf_epsg="EPSG:5070"):
     bmp_eff_lookup = pd.read_csv(str(lookup_path + "bmp_eff_vals_testing.csv"))
     usle_lookup = pd.read_csv(str(lookup_path + "usle_testing.csv"))
 
-    # append nass/soil nutrient columns
-    # TODO insert code to calculate and add columns:
-    # soil_n_ppm, soil_p_ppm, soil_conc
-
-    # append nass columns
-    # TODO insert code to calculate and add columns:
-    # n_animal, (type_animal?), animal_density
-
     # append tiger columns
     # TODO insert code to calculate and add columns:
     # state, county, fips
 
-    # append nhdplusv2 columns
+    # append nhdplusv2 columns (use v2 so is compatible with sparrow)
     # TODO insert code to calculate and add columns:
     # huc4_num, huc4_name
 
@@ -117,6 +109,14 @@ def run_plet(plet_project_path, gdf_epsg="EPSG:5070"):
     # field_gdf["area_ac"] = field_gdf.area / 4046.86
     # conversion factor used: 1 ac = 4046.36 m
     # TODO uncomment this to test it
+
+    # append soil columns
+    # TODO insert code to calculate and add columns:
+    # hgs, soil_n_ppm (optional), soil_p_ppm (optional), soil_conc (optional)
+
+    # append nass columns
+    # TODO insert code to calculate and add columns:
+    # n_animal, (type_animal?), animal_density
 
     # append prism columns
     # TODO insert code to calculate and add columns:
@@ -241,9 +241,9 @@ def run_plet(plet_project_path, gdf_epsg="EPSG:5070"):
     return field_gdf_final
 
 # test
-proj_path = (
-    r"C:/Users/sheila.saia/OneDrive - Tetra Tech, Inc/Documents/github/2024-esmc-plet"
-)
-test_gdf = run_plet(plet_project_path=proj_path)
+# proj_path = (
+#     r"C:/Users/sheila.saia/OneDrive - Tetra Tech, Inc/Documents/github/2024-esmc-plet"
+# )
+# test_gdf = run_plet(plet_project_path=proj_path)
 # export of geojson and csv worked
 # TODO check why i can't set the espg without getting an error
